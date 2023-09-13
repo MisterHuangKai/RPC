@@ -175,10 +175,10 @@ public class ClassScanner {
     }
 
     public static void main(String[] args) throws IOException {
-//        String nowPath = System.getProperty("user.dir");
-//        System.out.println("nowPath:" + nowPath);
-//
-//        String jarPath = nowPath + File.separator + "maven-wrapper.jar";
+        String nowPath = System.getProperty("user.dir");
+        System.out.println("nowPath:" + nowPath);
+
+        String jarPath = nowPath + File.separator + "maven-wrapper.jar";
 //        JarFile jarFile = new JarFile(jarPath);
 //        Enumeration<JarEntry> entries = jarFile.entries();
 //        while (entries.hasMoreElements()) {
@@ -190,7 +190,7 @@ public class ClassScanner {
         URL resource = Thread.currentThread().getContextClassLoader().getResource("");
         System.out.println(resource.toString());
         // file:/E:/Work/IntelliJ%20IDEA%20workspace/hk_rpc/hk_common/target/classes/
-
+        // nowPath:E:\Work\IntelliJ IDEA workspace\hk_rpc\RPC
     }
 
 }

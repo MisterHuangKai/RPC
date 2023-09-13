@@ -12,6 +12,13 @@
         <module>hk_annotation</module>
         <module>hk_constants</module>
         <module>hk_common</module>
+        <module>hk_test</module>
+        <module>hk_provider</module>
+        <module>hk_protocol</module>
+        <module>hk_reflect</module>
+        <module>hk_spi</module>
+        <module>hk_cache</module>
+        <module>hk_threadpool</module>
     </modules>
 
     <properties>
