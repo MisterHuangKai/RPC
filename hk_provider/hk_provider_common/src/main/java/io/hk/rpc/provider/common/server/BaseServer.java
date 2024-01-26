@@ -1,7 +1,6 @@
 package io.hk.rpc.provider.common.server;
 
 import io.hk.rpc.provider.common.handler.RpcProviderHandler;
-import io.hk.rpc.registry.RegistryService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -32,12 +31,6 @@ public class BaseServer implements Server {
 
     // 端口号
     private int port = 27110;
-
-    protected String serverRegistryHost;
-
-    protected int serverRegistryPort;
-
-    protected RegistryService registryService;
 
     // 存储的是实体类关系
     protected Map<String, Object> handlerMap = new HashMap<>();
