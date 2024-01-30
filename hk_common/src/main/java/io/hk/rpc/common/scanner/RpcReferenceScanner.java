@@ -41,7 +41,7 @@ public class RpcReferenceScanner extends ClassScanner {
     public static Map<String, Object> doScannerWithRpcReferenceAnnotationFilter(/*String host, int port, */ String scanPackage/*, RegistryService registryService*/) throws Exception{
         Map<String, Object> handlerMap = new HashMap<>();
         List<String> classNameList = getClassNameList(scanPackage, true);
-        if (classNameList == null || classNameList.isEmpty()){
+        if (classNameList.isEmpty()){
             return handlerMap;
         }
         classNameList.stream().forEach((className) -> {

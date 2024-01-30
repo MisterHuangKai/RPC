@@ -60,7 +60,7 @@ public class ClassScanner {
      */
     public static List<String> getClassNameList(String packageName, boolean recursive) throws Exception{
         //第一个class类的集合
-        List<String> classNameList = new ArrayList<String>();
+        List<String> classNameList = new ArrayList<>();
         //获取包的名字 并进行替换
         String packageDirName = packageName.replace('.', '/');
         //定义一个枚举的集合 并进行循环来处理这个目录下的things
@@ -179,16 +179,17 @@ public class ClassScanner {
         System.out.println("nowPath:" + nowPath);
 
         String jarPath = nowPath + File.separator + "maven-wrapper.jar";
-//        JarFile jarFile = new JarFile(jarPath);
-//        Enumeration<JarEntry> entries = jarFile.entries();
-//        while (entries.hasMoreElements()) {
-//            JarEntry jarEntry = entries.nextElement();
-//            String jarEntryName = jarEntry.getName();
-//            System.out.println("jarEntryName:" + jarEntryName);
-//        }
+        JarFile jarFile = new JarFile(jarPath);
+        Enumeration<JarEntry> entries = jarFile.entries();
+        while (entries.hasMoreElements()) {
+            JarEntry jarEntry = entries.nextElement();
+            String jarEntryName = jarEntry.getName();
+            System.out.println("jarEntryName:" + jarEntryName);
+        }
 
-        URL resource = Thread.currentThread().getContextClassLoader().getResource("");
-        System.out.println(resource.toString());
+//        URL resource = Thread.currentThread().getContextClassLoader().getResource("");
+//        System.out.println(resource.toString());
+
         // file:/E:/Work/IntelliJ%20IDEA%20workspace/hk_rpc/hk_common/target/classes/
         // nowPath:E:\Work\IntelliJ IDEA workspace\hk_rpc\RPC
     }

@@ -19,6 +19,7 @@
         <module>hk_spi</module>
         <module>hk_cache</module>
         <module>hk_threadpool</module>
+        <module>hk_registry</module>
     </modules>
 
     <properties>

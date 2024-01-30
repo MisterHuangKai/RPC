@@ -1,8 +1,6 @@
 package io.hk.rpc.protocol;
 
 
-import io.hk.rpc.protocol.header.RpcHeader;
-
 import java.io.Serializable;
 
 /**

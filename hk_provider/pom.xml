@@ -14,7 +14,7 @@
 
     <modules>
         <module>hk_provider_common</module>
-        <module>hk_provider_common</module>
+        <module>hk_provider_native</module>
     </modules>
 
     <dependencies>

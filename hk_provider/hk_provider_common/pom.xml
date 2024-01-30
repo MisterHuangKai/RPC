@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.hk</groupId>
         <artifactId>hk_provider</artifactId>
+        <groupId>org.hk</groupId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
@@ -19,29 +19,29 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>org.hk</groupId>
-            <artifactId>hk_cache</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.hk</groupId>-->
+<!--            <artifactId>hk_cache</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.hk</groupId>-->
+<!--            <artifactId>hk_protocol</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.hk</groupId>
-            <artifactId>hk_protocol</artifactId>
+            <artifactId>hk_registry_api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.hk</groupId>
-            <artifactId>hk_reflect_api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hk</groupId>
-            <artifactId>hk_threadpool</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.hk</groupId>-->
+<!--            <artifactId>hk_threadpool</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--        </dependency>-->
 
     </dependencies>
 
