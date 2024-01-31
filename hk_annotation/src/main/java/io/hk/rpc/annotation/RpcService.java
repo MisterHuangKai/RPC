@@ -12,14 +12,18 @@ import java.lang.annotation.Target;
  * @author binghe
  * @version 1.0.0
  * @description bhrpc服务提供者注解
- * @HK注:
- * 1.@RpcService(interfaceClass=BingheService.class, version="1.0.0", group="binghe")
- * public class BingheServiceImpl implements BingheService{
+ * @HK:
+ * 1. {@code
+ * @RpcService(interfaceClass=BingheService.class, version="1.0.0", group="binghe")
+ * public class BingheServiceImpl implements BingheService{}
  * }
- * 2.@RpcService(interfaceClassName="io.binghe.rpc.demo.service.BingheService", version="1.0.0", group="binghe")
- * public class BingheServiceImpl implements BingheService{
+ * <p>
+ * 2. {@code
+ * @RpcService(interfaceClassName="io.binghe.rpc.demo.service.BingheService", version="1.0.0", group="binghe")
+ * public class BingheServiceImpl implements BingheService{}
  * }
- * 3.服务提供者注解@RpcService是标注到实现类上的
+ * <p>
+ * 3. 服务提供者注解@RpcService是标注到实现类上的
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

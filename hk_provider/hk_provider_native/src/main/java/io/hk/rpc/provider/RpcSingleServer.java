@@ -14,7 +14,6 @@ public class RpcSingleServer extends BaseServer {
 
     private final Logger logger = LoggerFactory.getLogger(RpcSingleServer.class);
 
-
     public RpcSingleServer(String serverAddress, String scanPackage) {
         //调用父类构造方法
         super(serverAddress);
