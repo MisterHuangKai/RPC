@@ -5,16 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.hk</groupId>
-        <artifactId>hk_rpc</artifactId>
+        <artifactId>hk_test</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hk_test</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>hk_test_scanner</module>
-        <module>ht_test_provider</module>
-    </modules>
+    <artifactId>ht_test_provider</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -24,9 +19,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_annotation</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_provider_native</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

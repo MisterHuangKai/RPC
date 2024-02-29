@@ -22,9 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 /**
- * @author binghe
- * @version 1.0.0
- * @description RPC服务提供者的Handler处理类
+ * RPC服务提供者的Handler处理类
  */
 public class RpcProviderHandler extends SimpleChannelInboundHandler<Object> {
 
@@ -44,4 +42,5 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<Object> {
 
         ctx.writeAndFlush(o);
     }
+
 }

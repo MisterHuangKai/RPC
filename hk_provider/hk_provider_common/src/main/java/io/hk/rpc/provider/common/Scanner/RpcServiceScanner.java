@@ -14,16 +14,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author binghe
- * @version 1.0.0
- * @description @RpcService注解扫描器
+ * '@RpcService'注解扫描器
  */
 public class RpcServiceScanner extends ClassScanner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcServiceScanner.class);
 
     /**
-     * 扫描指定包下的类，并筛选使用@RpcService注解标注的类
+     * 扫描指定包下的类，筛选其中使用@RpcService注解标注的类
      */
     public static Map<String, Object> doScannerWithRpcServiceAnnotationFilterAndRegistryService(String host, int port, String scanPackage, RegistryService registryService) throws Exception {
         Map<String, Object> handlerMap = new HashMap<>();
@@ -36,11 +34,16 @@ public class RpcServiceScanner extends ClassScanner {
                 Class<?> clazz = Class.forName(className);
                 RpcService rpcService = clazz.getAnnotation(RpcService.class);
                 if (rpcService != null) {
+                    /*
                     //优先使用interfaceClass, interfaceClass的name为空，再使用interfaceClassName
                     ServiceMeta serviceMeta = new ServiceMeta(getServiceName(rpcService), rpcService.version(), rpcService.group(), host, port, getWeight(rpcService.weight()));
                     //将元数据注册到注册中心
                     registryService.register(serviceMeta);
                     handlerMap.put(RpcServiceHelper.buildServiceKey(serviceMeta.getServiceName(), serviceMeta.getServiceVersion(), serviceMeta.getServiceGroup()), clazz.newInstance());
+                    */
+                    String serviceName = getServiceName(rpcService);
+                    String key = serviceName.concat(rpcService.version()).concat(rpcService.group());
+                    handlerMap.put(key, clazz.newInstance());
                 }
             } catch (Exception e) {
                 LOGGER.error("scan classes throws exception: {}", e);

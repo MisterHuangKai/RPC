@@ -6,9 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author binghe(公众号 ： 冰河技术)
- * @version 1.0.0
- * @description 以Java原生方式启动启动Rpc
+ * 以Java原生方式启动启动Rpc
  */
 public class RpcSingleServer extends BaseServer {
 
