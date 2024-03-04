@@ -18,9 +18,7 @@ package io.hk.rpc.spi.annotation;
 import java.lang.annotation.*;
 
 /**
- * @author binghe
- * @version 1.0.0
- * @description @SPI
+ * @SPI
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

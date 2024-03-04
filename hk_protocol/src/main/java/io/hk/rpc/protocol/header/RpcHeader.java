@@ -4,14 +4,13 @@ import java.io.Serializable;
 
 /**
  * 消息头，目前固定为32个字节
- *
+ * <p>
  * 魔数：验证自定义网络传输协议的最基本的校验信息，占据2字节空间。
  * 报文类型：消息的类型，可以分为请求消息、响应消息和心跳消息，占据1字节空间。
  * 状态：消息的状态，占据1字节空间。
  * 消息ID：消息的唯一标识，占据8字节空间。
  * 序列化类型：数据进行序列化和反序列化的类型标识，暂定16字节空间。
  * 数据长度：标识消息体的数据长度，占据4字节空间。
- *
  */
 public class RpcHeader implements Serializable {
     private static final long serialVersionUID = 6011436680686290298L;
