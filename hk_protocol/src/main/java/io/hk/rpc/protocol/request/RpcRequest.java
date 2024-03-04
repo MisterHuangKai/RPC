@@ -4,9 +4,7 @@ package io.hk.rpc.protocol.request;
 import io.hk.rpc.protocol.base.RpcMessage;
 
 /**
- * @author binghe
- * @version 1.0.0
- * @description Rpc请求封装类，对应的请求id在消息头中
+ * Rpc请求封装类，对应的请求id在消息头中
  */
 public class RpcRequest extends RpcMessage {
     private static final long serialVersionUID = 5555776886650396129L;

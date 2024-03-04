@@ -18,9 +18,7 @@ package io.hk.rpc.protocol.base;
 import java.io.Serializable;
 
 /**
- * @author binghe
- * @version 1.0.0
- * @description 消息体基础类
+ * 消息体基础类
  */
 public class RpcMessage implements Serializable {
 
