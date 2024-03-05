@@ -21,6 +21,7 @@
         <module>hk_threadpool</module>
         <module>hk_registry</module>
         <module>hk_serialization</module>
+        <module>hk_codec</module>
     </modules>
 
     <properties>

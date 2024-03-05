@@ -21,4 +21,13 @@ public enum RpcType {
         return type;
     }
 
+    public static RpcType findByType(int type) {
+        for (RpcType rpcType : RpcType.values()) {
+            if (rpcType.getType() == type) {
+                return rpcType;
+            }
+        }
+        return null;
+    }
+
 }

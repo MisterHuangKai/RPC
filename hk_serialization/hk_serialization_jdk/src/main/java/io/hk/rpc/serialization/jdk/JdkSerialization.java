@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.Date;
 
 /**
  * Jdk Serialization
@@ -46,6 +47,22 @@ public class JdkSerialization implements Serialization {
             throw new SerializerException(e.getMessage(), e);
         }
     }
-    // todo oneNote
-//    https://blog.51cto.com/u_16213597/7391893
+
+    public static void main(String[] args) {
+        try {
+            // 创建文件输出流
+            FileOutputStream fos = new FileOutputStream("D:/demo/test.txt");
+            // 创建相应的对象输出流
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            // 写入输出流数据
+            oos.writeInt(1314);
+            oos.writeObject("这些东西将会写入test.txt文件中");
+            oos.writeObject(new Date());
+            oos.close();
+            fos.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
