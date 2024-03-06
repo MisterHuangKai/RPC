@@ -8,7 +8,7 @@ import io.hk.rpc.serialization.jdk.JdkSerialization;
  */
 public interface RpcCodec {
 
-     default Serialization getJdkSerialization(){
+    default Serialization getJdkSerialization() {
         return new JdkSerialization();
     }
 

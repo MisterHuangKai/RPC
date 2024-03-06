@@ -52,9 +52,9 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
 
         RpcHeader header = new RpcHeader();
         header.setMagic(magic);
+        header.setMsgType(msgType);
         header.setStatus(status);
         header.setRequestId(requestId);
-        header.setMsgType(msgType);
         header.setSerializationType(serializationType);
         header.setMsgLen(dataLength);
         // todo Serialization是扩展点

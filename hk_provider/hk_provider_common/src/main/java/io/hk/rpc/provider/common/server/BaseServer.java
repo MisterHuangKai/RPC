@@ -1,5 +1,7 @@
 package io.hk.rpc.provider.common.server;
 
+import io.hk.rpc.codec.RpcDecoder;
+import io.hk.rpc.codec.RpcEncoder;
 import io.hk.rpc.provider.common.handler.RpcProviderHandler;
 import io.hk.rpc.registry.RegistryService;
 import io.netty.bootstrap.ServerBootstrap;
@@ -59,9 +61,9 @@ public class BaseServer implements Server {
 
                         @Override
                         protected void initChannel(SocketChannel channel) throws Exception {
-                            channel.pipeline()  // TODO 预留编解码, 需要实现自定义协议
-                                    .addLast(new StringDecoder())
-                                    .addLast(new StringEncoder())
+                            channel.pipeline()
+                                    .addLast(new RpcDecoder())
+                                    .addLast(new RpcEncoder())
                                     .addLast(new RpcProviderHandler(handlerMap));
                         }
                     }).option(ChannelOption.SO_BACKLOG, 128)
