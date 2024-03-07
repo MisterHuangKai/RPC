@@ -5,29 +5,29 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.hk</groupId>
-        <artifactId>hk_rpc</artifactId>
+        <artifactId>hk_test</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hk_test</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>hk_test_scanner</module>
-        <module>ht_test_provider</module>
-        <module>hk_test_consumer</module>
-    </modules>
+    <artifactId>hk_test_consumer</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_protocol</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_codec</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
