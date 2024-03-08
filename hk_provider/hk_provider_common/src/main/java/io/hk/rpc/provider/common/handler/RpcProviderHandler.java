@@ -16,7 +16,10 @@
 package io.hk.rpc.provider.common.handler;
 
 import com.alibaba.fastjson.JSONObject;
+import io.hk.rpc.common.helper.RpcServiceHelper;
+import io.hk.rpc.common.threadpool.ServerThreadPool;
 import io.hk.rpc.protocol.RpcProtocol;
+import io.hk.rpc.protocol.enumeration.RpcStatus;
 import io.hk.rpc.protocol.enumeration.RpcType;
 import io.hk.rpc.protocol.header.RpcHeader;
 import io.hk.rpc.protocol.request.RpcRequest;
@@ -25,6 +28,7 @@ import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -42,23 +46,78 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcRequest> protocol) throws Exception {
-        logger.info("RPC提供者收到的数据===>>>" + JSONObject.toJSONString(protocol));
-        logger.info("handlerMap中存放的数据如下: ===>>>");
-        handlerMap.keySet().forEach(key -> logger.info(key + "===>>>" + handlerMap.get(key)));
+        logger.info("===>>> 调用RpcProviderHandler的channelRead0方法。");
+        ServerThreadPool.submit(() -> {
+            RpcHeader header = protocol.getHeader();
+            header.setMsgType((byte) RpcType.RESPONSE.getType());
+            logger.debug("Receive request: " + header.getRequestId());
+            RpcRequest request = protocol.getBody();
+            RpcProtocol<RpcResponse> responseRpcProtocol = new RpcProtocol<>();
+            RpcResponse response = new RpcResponse();
+            try {
+                // 调用真实方法
+                Object result = handle(request);
+                response.setResult(result);
+                response.setAsync(request.getAsync());
+                response.setOneway(request.getOneway());
+                header.setStatus((byte) RpcStatus.SUCCESS.getCode());
+            } catch (Throwable throwable) {
+                response.setError(throwable.toString());
+                header.setStatus((byte) RpcStatus.FAIL.getCode());
+                logger.error("RPC Server handle request error ", throwable);
+            }
+            responseRpcProtocol.setHeader(header);
+            responseRpcProtocol.setBody(response);
+            ctx.writeAndFlush(responseRpcProtocol).addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                    logger.debug("Send response for request: " + header.getRequestId());
+                }
+            });
+        });
+    }
 
-        RpcHeader header = protocol.getHeader();
-        RpcRequest request = protocol.getBody();
-        // 将header中的消息类型设置为响应类型的消息
-        header.setMsgType((byte) RpcType.RESPONSE.getType());
-        // 构建响应协议数据
-        RpcResponse response = new RpcResponse();
-        response.setResult("数据交互成功");
-        response.setAsync(request.getAsync());
-        response.setOneway(request.getOneway());
-        RpcProtocol<RpcResponse> responseRpcProtocol = new RpcProtocol<>();
-        responseRpcProtocol.setHeader(header);
-        responseRpcProtocol.setBody(response);
-        ctx.writeAndFlush(responseRpcProtocol);
+    /**
+     * 1.从handlerMap中获取到服务提供者启动时保存到 handlerMap中的类实例
+     * 2.调用invokeMethod方法实现调用真实方法的逻辑
+     */
+    private Object handle(RpcRequest request) throws Throwable {
+        String serviceKey = RpcServiceHelper.buildServiceKey(request.getClassName(), request.getVersion(), request.getGroup());
+        Object serviceBean = handlerMap.get(serviceKey);
+        if (serviceBean == null) {
+            throw new RuntimeException(String.format("servie not exists: %s:%s", request.getClassName(), request.getMethodName()));
+        }
+        Class<?> serviceClass = serviceBean.getClass();
+        logger.debug(serviceClass.getName());
+
+        String methodName = request.getMethodName();
+        logger.debug(methodName);
+        Class<?>[] parameterTypes = request.getParameterTypes();
+        Object[] parameters = request.getParameters();
+        if (parameterTypes != null && parameterTypes.length > 0) {
+            for (Class<?> parameterType : parameterTypes) {
+                logger.debug("parameterType: " + parameterType.getName());
+            }
+        }
+        if (parameters != null && parameters.length > 0) {
+            for (Object parameter : parameters) {
+                logger.debug("parameter: " + parameter.toString());
+            }
+        }
+
+        return invokeMethod(serviceBean, serviceClass, methodName, parameterTypes, parameters);
+    }
+
+    /**
+     * 通过反射技术调用具体的方法
+     */
+    private Object invokeMethod(Object serviceBean, Class<?> serviceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws Throwable {
+        Method method = serviceClass.getMethod(methodName, parameterTypes);
+        // 值为true则指示, 反射的对象在使用时应该取消Java语言访问检查。
+        // 值为false则指示, 反射的对象应该实施Java语言访问检查。
+        method.setAccessible(true);
+        // todo https://zhuanlan.zhihu.com/p/376938715
+        return method.invoke(serviceBean, parameters);
     }
 
 }
