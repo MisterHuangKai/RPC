@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RPC消费者处理器
- *
+ * <p>
  * HK:
  *  1. channelActive()方法中,模拟封装了请求数据协议,并将数据发送到服务提供者。
  *  2. channelRead0()方法中,直接打印收到的从服务提供者响应过来的数据。
@@ -26,7 +26,7 @@ public class RpcTestConsumerHandler extends SimpleChannelInboundHandler<RpcProto
         logger.info("发送数据开始...");
         // 模拟发送数据
         RpcRequest request = new RpcRequest();
-        request.setClassName("io.hk.rpc.test.DemoService");
+        request.setClassName("io.hk.rpc.test.provider.DemoService");
         request.setMethodName("hello");
         request.setParameters(new Object[]{"hk"});
         request.setParameterTypes(new Class[]{String.class});

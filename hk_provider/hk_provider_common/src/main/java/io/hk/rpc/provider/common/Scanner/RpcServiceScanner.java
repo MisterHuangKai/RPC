@@ -1,10 +1,10 @@
 package io.hk.rpc.provider.common.Scanner;
 
+import com.alibaba.fastjson.JSONObject;
 import io.hk.rpc.annotation.RpcService;
 import io.hk.rpc.common.helper.RpcServiceHelper;
 import io.hk.rpc.common.scanner.ClassScanner;
 import io.hk.rpc.constants.RpcConstants;
-import io.hk.rpc.protocol.ServiceMeta;
 import io.hk.rpc.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +42,9 @@ public class RpcServiceScanner extends ClassScanner {
                     handlerMap.put(RpcServiceHelper.buildServiceKey(serviceMeta.getServiceName(), serviceMeta.getServiceVersion(), serviceMeta.getServiceGroup()), clazz.newInstance());
                     */
                     String serviceName = getServiceName(rpcService);
-                    String key = serviceName.concat(rpcService.version()).concat(rpcService.group());
+                    String key = RpcServiceHelper.buildServiceKey(serviceName, rpcService.version(), rpcService.group());
                     handlerMap.put(key, clazz.newInstance());
+                    LOGGER.info("scan key ===>>> {}", JSONObject.toJSONString(handlerMap.keySet()));
                 }
             } catch (Exception e) {
                 LOGGER.error("scan classes throws exception: {}", e);

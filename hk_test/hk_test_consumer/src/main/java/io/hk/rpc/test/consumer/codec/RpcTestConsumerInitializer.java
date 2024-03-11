@@ -7,6 +7,9 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 
 
+/**
+ * RPC测试消费者的 初始化程序
+ */
 public class RpcTestConsumerInitializer extends ChannelInitializer<SocketChannel> {
 
     /**
