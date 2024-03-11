@@ -116,7 +116,6 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
         // 值为true则指示, 反射的对象在使用时应该取消Java语言访问检查。
         // 值为false则指示, 反射的对象应该实施Java语言访问检查。
         method.setAccessible(true);
-        // todo https://zhuanlan.zhihu.com/p/376938715
         return method.invoke(serviceBean, parameters);
     }
 
