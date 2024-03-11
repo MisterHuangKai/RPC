@@ -17,6 +17,7 @@ package io.hk.rpc.provider.common.handler;
 
 import io.hk.rpc.common.helper.RpcServiceHelper;
 import io.hk.rpc.common.threadpool.ServerThreadPool;
+import io.hk.rpc.constants.RpcConstants;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.enumeration.RpcStatus;
 import io.hk.rpc.protocol.enumeration.RpcType;
@@ -24,6 +25,8 @@ import io.hk.rpc.protocol.header.RpcHeader;
 import io.hk.rpc.protocol.request.RpcRequest;
 import io.hk.rpc.protocol.response.RpcResponse;
 import io.netty.channel.*;
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +42,11 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
 
     private final Map<String, Object> handlerMap;
 
-    public RpcProviderHandler(Map<String, Object> handlerMap) {
+    // 调用类型, 采用哪种类型调用真实方法
+    private final String reflectType;
+
+    public RpcProviderHandler(String reflectType, Map<String, Object> handlerMap) {
+        this.reflectType = reflectType;
         this.handlerMap = handlerMap;
     }
 
@@ -112,11 +119,34 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
      * 通过反射技术调用具体的方法
      */
     private Object invokeMethod(Object serviceBean, Class<?> serviceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws Throwable {
+
+        switch (this.reflectType) {
+            case RpcConstants.REFLECT_TYPE_JDK:
+                return this.invokeJDKMethod(serviceBean, serviceClass, methodName, parameterTypes, parameters);
+            case RpcConstants.REFLECT_TYPE_CGLIB:
+                return this.invokeCGLibMethod(serviceBean, serviceClass, methodName, parameterTypes, parameters);
+            default:
+                throw new IllegalArgumentException("not support reflect type.");
+        }
+    }
+
+    // JDK reflect
+    private Object invokeJDKMethod(Object serviceBean, Class<?> serviceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws Throwable {
+        logger.info(" use JDK reflect type to invoke method ...");
         Method method = serviceClass.getMethod(methodName, parameterTypes);
         // 值为true则指示, 反射的对象在使用时应该取消Java语言访问检查。
         // 值为false则指示, 反射的对象应该实施Java语言访问检查。
         method.setAccessible(true);
         return method.invoke(serviceBean, parameters);
     }
+
+    // CGLib reflect
+    private Object invokeCGLibMethod(Object serviceBean, Class<?> serviceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws Throwable{
+        logger.info(" use CGLib reflect type to invoke method ...");
+        FastClass fastClass = FastClass.create(serviceClass);
+        FastMethod fastMethod = fastClass.getMethod(methodName, parameterTypes);
+        return fastMethod.invoke(serviceBean, parameters);
+    }
+
 
 }
