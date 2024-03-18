@@ -10,7 +10,8 @@ public class RpcSingleServerTest {
 
     @Test
     public void startRpcSingleServer() {
-        RpcSingleServer rpcSingleServer = new RpcSingleServer("127.0.0.1:27880", "io.hk.rpc.test");
+//        RpcSingleServer rpcSingleServer = new RpcSingleServer("127.0.0.1:27880", "io.hk.rpc.test", "jdk");
+        RpcSingleServer rpcSingleServer = new RpcSingleServer("127.0.0.1:27880", "io.hk.rpc.test", "cglib");
         rpcSingleServer.startNettyServer();
     }
 

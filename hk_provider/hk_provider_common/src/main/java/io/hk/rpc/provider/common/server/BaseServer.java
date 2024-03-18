@@ -30,6 +30,8 @@ public class BaseServer implements Server {
     private String host = "127.0.0.1";
     // 端口号
     private int port = 27110;
+    // 反射类型
+    private String reflectType;
     //
     protected String serverRegistryHost;
     //
@@ -40,12 +42,13 @@ public class BaseServer implements Server {
     // 存储的是实体类关系
     protected Map<String, Object> handlerMap = new HashMap<>();
 
-    public BaseServer(String serverAddress) {
+    public BaseServer(String serverAddress, String reflectType) {
         if (!StringUtils.isEmpty(serverAddress)) {
             String[] serverArray = serverAddress.split(":");
             this.host = serverArray[0];
             this.port = Integer.parseInt(serverArray[1]);
         }
+        this.reflectType = reflectType;
     }
 
     @Override
@@ -62,7 +65,7 @@ public class BaseServer implements Server {
                             channel.pipeline()
                                     .addLast(new RpcDecoder())
                                     .addLast(new RpcEncoder())
-                                    .addLast(new RpcProviderHandler(handlerMap));
+                                    .addLast(new RpcProviderHandler(reflectType, handlerMap));
                         }
                     }).option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
