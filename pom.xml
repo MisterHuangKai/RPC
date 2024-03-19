@@ -22,6 +22,7 @@
         <module>hk_registry</module>
         <module>hk_serialization</module>
         <module>hk_codec</module>
+        <module>hk_consumer</module>
     </modules>
 
     <properties>
