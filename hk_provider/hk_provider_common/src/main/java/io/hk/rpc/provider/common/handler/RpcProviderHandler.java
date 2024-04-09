@@ -92,7 +92,7 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
         String serviceKey = RpcServiceHelper.buildServiceKey(request.getClassName(), request.getVersion(), request.getGroup());
         Object serviceBean = handlerMap.get(serviceKey);
         if (serviceBean == null) {
-            throw new RuntimeException(String.format("servie not exists: %s:%s", request.getClassName(), request.getMethodName()));
+            throw new RuntimeException(String.format("service not exists: %s:%s", request.getClassName(), request.getMethodName()));
         }
         Class<?> serviceClass = serviceBean.getClass();
         logger.debug(serviceClass.getName());

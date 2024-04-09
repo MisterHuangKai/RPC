@@ -46,7 +46,7 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
     }
 
     /**
-     * 接收服务提供者响应的数据
+     * 服务消费者,接收服务提供者响应的数据
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcResponse> protocol) throws Exception {
@@ -54,7 +54,7 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
     }
 
     /**
-     * 服务消费者向服务提供者发送请求
+     * 服务消费者,向服务提供者发送请求
      */
     public void sendRequest(RpcProtocol<RpcRequest> protocol) {
         logger.info("服务消费者发送的数据===>>>{}", JSONObject.toJSONString(protocol));

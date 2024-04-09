@@ -14,7 +14,7 @@ public class RpcConsumerHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcConsumerHandlerTest.class);
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws Exception {
         RpcConsumer rpcConsumer = RpcConsumer.getInstance();
         rpcConsumer.sendRequest(getRpcRequestProtocol());
         Thread.sleep(2000);
@@ -28,8 +28,15 @@ public class RpcConsumerHandlerTest {
 
         RpcRequest request = new RpcRequest();
         request.setClassName("io.hk.rpc.test.api.DemoService");
-        // todo
-
+        request.setGroup("hk");
+        request.setMethodName("hello");
+        request.setParameters(new Object[]{"huangkai"});
+        request.setParameterTypes(new Class[]{String.class});
+        request.setVersion("1.0.0");
+        request.setAsync(false);
+        request.setOneway(false);
+        protocol.setBody(request);
+        return protocol;
     }
 
 

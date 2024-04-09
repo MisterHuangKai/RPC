@@ -7,11 +7,9 @@ import io.hk.rpc.protocol.request.RpcRequest;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.EventLoop;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import org.apache.tools.ant.types.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 服务消费者
  */
 public class RpcConsumer {
+
     private final Logger logger = LoggerFactory.getLogger(RpcConsumer.class);
 
     private final Bootstrap bootstrap;
