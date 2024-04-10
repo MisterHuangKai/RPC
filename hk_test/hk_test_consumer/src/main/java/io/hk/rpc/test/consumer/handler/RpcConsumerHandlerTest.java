@@ -27,7 +27,7 @@ public class RpcConsumerHandlerTest {
         protocol.setHeader(RpcHeaderFactory.getRequestHeader("jdk"));
 
         RpcRequest request = new RpcRequest();
-        request.setClassName("io.hk.rpc.test.api.DemoService");
+        request.setClassName("io.hk.rpc.test.provider.DemoService");
         request.setGroup("hk");
         request.setMethodName("hello");
         request.setParameters(new Object[]{"huangkai"});

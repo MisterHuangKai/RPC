@@ -87,5 +87,4 @@ public class RpcConsumer {
         return channelFuture.channel().pipeline().get(RpcConsumerHandler.class);
     }
 
-
 }
