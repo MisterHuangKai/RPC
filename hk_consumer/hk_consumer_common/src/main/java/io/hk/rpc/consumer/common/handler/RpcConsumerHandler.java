@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.SocketAddress;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * RPC 消费者处理器
@@ -22,8 +24,10 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
     private final Logger logger = LoggerFactory.getLogger(RpcConsumerHandler.class);
 
     private volatile Channel channel;
-
     public SocketAddress remotePeer;
+
+    // 存储 请求ID与RpcResponse协议的映射关系
+    private Map<Long, RpcProtocol<RpcResponse>> pendingResponse = new ConcurrentHashMap<>(); // 实现异步转同步的关键
 
     public Channel getChannel() {
         return channel;
