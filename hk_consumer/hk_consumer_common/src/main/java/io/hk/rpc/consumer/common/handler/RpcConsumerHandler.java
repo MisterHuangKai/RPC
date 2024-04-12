@@ -2,6 +2,7 @@ package io.hk.rpc.consumer.common.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import io.hk.rpc.protocol.RpcProtocol;
+import io.hk.rpc.protocol.header.RpcHeader;
 import io.hk.rpc.protocol.request.RpcRequest;
 import io.hk.rpc.protocol.response.RpcResponse;
 import io.netty.buffer.Unpooled;
@@ -54,15 +55,34 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcResponse> protocol) throws Exception {
+        if (protocol == null) {
+            return;
+        }
+
         logger.info("服务消费者接收到的数据===>>>{}", JSONObject.toJSONString(protocol));
+        RpcHeader header = protocol.getHeader();
+        long requestId = header.getRequestId();
+        pendingResponse.put(requestId, protocol);
     }
 
     /**
      * 服务消费者,向服务提供者发送请求
+     *
+     * @return
      */
-    public void sendRequest(RpcProtocol<RpcRequest> protocol) {
+    public Object sendRequest(RpcProtocol<RpcRequest> protocol) {
         logger.info("服务消费者发送的数据===>>>{}", JSONObject.toJSONString(protocol));
         channel.writeAndFlush(protocol);
+
+        RpcHeader header = protocol.getHeader();
+        long requestId = header.getRequestId();
+        // 异步转同步
+        while (true) {
+            RpcProtocol<RpcResponse> responseRpcProtocol = pendingResponse.remove(requestId);
+            if (responseRpcProtocol != null) {
+                return responseRpcProtocol.getBody().getResult();
+            }
+        }
     }
 
     public void close() {
