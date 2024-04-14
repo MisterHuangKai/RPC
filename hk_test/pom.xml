@@ -15,7 +15,6 @@
         <module>hk_test_scanner</module>
         <module>ht_test_provider</module>
         <module>hk_test_consumer</module>
-        <module>hk_test_api</module>
     </modules>
 
     <properties>

@@ -16,8 +16,8 @@ public class RpcConsumerHandlerTest {
 
     public static void main(String[] args) throws Exception {
         RpcConsumer rpcConsumer = RpcConsumer.getInstance();
-        rpcConsumer.sendRequest(getRpcRequestProtocol());
-        Thread.sleep(2000);
+        Object result = rpcConsumer.sendRequest(getRpcRequestProtocol());
+        LOGGER.info("从服务消费者获取到的数据===>>> " +result.toString());
         rpcConsumer.close();
     }
 
