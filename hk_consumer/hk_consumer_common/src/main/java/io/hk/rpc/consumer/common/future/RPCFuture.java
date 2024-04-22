@@ -78,6 +78,7 @@ public class RPCFuture extends CompletableFuture<Object> {
         }
     }
 
+    // 超时阻塞获取responseRpcProtocol协议对象中的实际结果数据
     @Override
     public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         boolean success = sync.tryAcquireNanos(-1, unit.toNanos(timeout));
@@ -104,6 +105,8 @@ public class RPCFuture extends CompletableFuture<Object> {
         throw new UnsupportedOperationException();
     }
 
+    // 当服务消费者接收到服务提供者响应的结果时,就会调用done()方法,并传入RpcResponse类型的协议对象，
+    // 此时会唤醒阻塞的线程获取响应的结果数据。
     public void done(RpcProtocol<RpcResponse> responseRpcProtocol) {
         this.responseRpcProtocol = responseRpcProtocol;
         sync.release(1);

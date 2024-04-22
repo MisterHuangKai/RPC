@@ -1,5 +1,6 @@
 package io.hk.rpc.consumer.common;
 
+import io.hk.rpc.consumer.common.future.RPCFuture;
 import io.hk.rpc.consumer.common.handler.RpcConsumerHandler;
 import io.hk.rpc.consumer.common.initializer.RpcConsumerInitializer;
 import io.hk.rpc.protocol.RpcProtocol;
@@ -52,7 +53,7 @@ public class RpcConsumer {
         eventLoopGroup.shutdownGracefully();
     }
 
-    public Object sendRequest(RpcProtocol<RpcRequest> protocol) throws Exception {
+    public RPCFuture sendRequest(RpcProtocol<RpcRequest> protocol) throws Exception {
         // todo 暂时写死,后续再引入注册中心时,从注册中心获取
         String serviceAddress = "127.0.0.1";
         int port = 27880;
