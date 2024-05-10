@@ -1,6 +1,7 @@
 package io.hk.rpc.consumer.common.handler;
 
 import com.alibaba.fastjson.JSONObject;
+import io.hk.rpc.consumer.common.context.RpcContext;
 import io.hk.rpc.consumer.common.future.RPCFuture;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.header.RpcHeader;
@@ -72,17 +73,48 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
 
     /**
      * 服务消费者,向服务提供者发送请求
-     *
-     * @return
      */
-    public RPCFuture sendRequest(RpcProtocol<RpcRequest> protocol) {
+    public RPCFuture sendRequest(RpcProtocol<RpcRequest> protocol, boolean async, boolean oneway) {
         logger.info("服务消费者发送的数据===>>>{}", JSONObject.toJSONString(protocol));
-        // 返回一个new的RpcRuture
+        return oneway ? this.sendRequestOneway(protocol) : async ? this.sendRequestAsync(protocol) : this.sendRequestSync(protocol);
+    }
+
+    /**
+     * 同步调用方法
+     */
+    private RPCFuture sendRequestSync(RpcProtocol<RpcRequest> protocol) {
+        logger.info("调用:同步.");
         RPCFuture rpcFuture = this.getRpcFuture(protocol);
         channel.writeAndFlush(protocol);
         return rpcFuture;
     }
 
+    /**
+     * 异步调用方法
+     */
+    private RPCFuture sendRequestAsync(RpcProtocol<RpcRequest> protocol) {
+        logger.info("调用:异步.");
+        RPCFuture rpcFuture = this.getRpcFuture(protocol);
+        // 如果是异步调用,则将 RPCFuture 放入 RpcContext
+        RpcContext.getContext().setRPCFuture(rpcFuture);
+        channel.writeAndFlush(protocol);
+        return null;
+    }
+
+    /**
+     * 单向调用
+     */
+    private RPCFuture sendRequestOneway(RpcProtocol<RpcRequest> protocol) {
+        logger.info("调用:单向.");
+        channel.writeAndFlush(protocol);
+        return null;
+    }
+
+    /**
+     * 返回一个new的RpcRuture
+     * @param protocol
+     * @return
+     */
     private RPCFuture getRpcFuture(RpcProtocol<RpcRequest> protocol) {
         RPCFuture rpcFuture = new RPCFuture(protocol);
         RpcHeader header = protocol.getHeader();
