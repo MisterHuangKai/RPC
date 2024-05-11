@@ -1,6 +1,7 @@
 package io.hk.rpc.test.consumer.handler;
 
 import io.hk.rpc.consumer.common.RpcConsumer;
+import io.hk.rpc.consumer.common.callback.AsyncRPCCallback;
 import io.hk.rpc.consumer.common.context.RpcContext;
 import io.hk.rpc.consumer.common.future.RPCFuture;
 import io.hk.rpc.protocol.RpcProtocol;
@@ -20,15 +21,29 @@ public class RpcConsumerHandlerTest {
         RpcConsumer rpcConsumer = RpcConsumer.getInstance();
 
         // 同步调用
-//        RPCFuture rpcFuture = rpcConsumer.sendRequest(getRpcRequestProtocol());
+        RPCFuture rpcFuture = rpcConsumer.sendRequest(getRpcRequestProtocol());
 
         // 异步调用
 //        rpcConsumer.sendRequest(getRpcRequestProtocol());
 //        RPCFuture rpcFuture = RpcContext.getContext().getRPCFuture();
 
         // 单向调用
-        rpcConsumer.sendRequest(getRpcRequestProtocol());
-        LOGGER.info("无需获取返回的结果数据.");
+//        rpcConsumer.sendRequest(getRpcRequestProtocol());
+//        LOGGER.info("无需获取返回的结果数据.");
+
+        // 回调方法
+        rpcFuture.addCallback(new AsyncRPCCallback() {
+            @Override
+            public void onSuccess(Object result) {
+                LOGGER.info("从服务消费者获取到的数据===>>>" + result);
+            }
+
+            @Override
+            public void onException(Exception e) {
+                LOGGER.info("抛出了异常===>>>" + e);
+            }
+        });
+        Thread.sleep(2000);
 
 //        LOGGER.info("从服务消费者获取到的数据===>>> " + rpcFuture.get());
         rpcConsumer.close();
@@ -48,8 +63,8 @@ public class RpcConsumerHandlerTest {
         request.setVersion("1.0.0");
         request.setAsync(false); // 同步调用
 //        request.setAsync(true); // 异步调用
-//        request.setOneway(false);
-        request.setOneway(true); // 单向调用
+        request.setOneway(false);
+//        request.setOneway(true); // 单向调用
         protocol.setBody(request);
         return protocol;
     }
