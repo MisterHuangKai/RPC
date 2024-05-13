@@ -5,6 +5,7 @@ import io.hk.rpc.consumer.common.handler.RpcConsumerHandler;
 import io.hk.rpc.consumer.common.initializer.RpcConsumerInitializer;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.request.RpcRequest;
+import io.hk.rpc.proxy.api.consumer.Consumer;
 import io.hk.rpc.proxy.api.future.RPCFuture;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -21,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 服务消费者
  */
-public class RpcConsumer{
+public class RpcConsumer implements Consumer {
 
     private final Logger logger = LoggerFactory.getLogger(RpcConsumer.class);
 
@@ -55,6 +56,7 @@ public class RpcConsumer{
         ClientThreadPool.shutdown();
     }
 
+    @Override
     public RPCFuture sendRequest(RpcProtocol<RpcRequest> protocol) throws Exception {
         // todo 暂时写死,后续再引入注册中心时,从注册中心获取
         String serviceAddress = "127.0.0.1";
