@@ -2,11 +2,11 @@ package io.hk.rpc.consumer.common.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import io.hk.rpc.consumer.common.context.RpcContext;
-import io.hk.rpc.consumer.common.future.RPCFuture;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.header.RpcHeader;
 import io.hk.rpc.protocol.request.RpcRequest;
 import io.hk.rpc.protocol.response.RpcResponse;
+import io.hk.rpc.proxy.api.future.RPCFuture;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;

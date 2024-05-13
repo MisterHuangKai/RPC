@@ -1,11 +1,11 @@
 package io.hk.rpc.consumer.common;
 
 import io.hk.rpc.common.threadpool.ClientThreadPool;
-import io.hk.rpc.consumer.common.future.RPCFuture;
 import io.hk.rpc.consumer.common.handler.RpcConsumerHandler;
 import io.hk.rpc.consumer.common.initializer.RpcConsumerInitializer;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.request.RpcRequest;
+import io.hk.rpc.proxy.api.future.RPCFuture;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 服务消费者
  */
-public class RpcConsumer {
+public class RpcConsumer{
 
     private final Logger logger = LoggerFactory.getLogger(RpcConsumer.class);
 

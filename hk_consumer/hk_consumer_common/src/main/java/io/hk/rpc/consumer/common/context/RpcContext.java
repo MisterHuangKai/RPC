@@ -1,6 +1,7 @@
 package io.hk.rpc.consumer.common.context;
 
-import io.hk.rpc.consumer.common.future.RPCFuture;
+
+import io.hk.rpc.proxy.api.future.RPCFuture;
 
 /**
  * 保存 RPC 上下文

@@ -1,10 +1,10 @@
-package io.hk.rpc.consumer.common.future;
+package io.hk.rpc.proxy.api.future;
 
 import io.hk.rpc.common.threadpool.ClientThreadPool;
-import io.hk.rpc.consumer.common.callback.AsyncRPCCallback;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.request.RpcRequest;
 import io.hk.rpc.protocol.response.RpcResponse;
+import io.hk.rpc.proxy.api.callback.AsyncRPCCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,8 +115,9 @@ public class RPCFuture extends CompletableFuture<Object> {
         throw new UnsupportedOperationException();
     }
 
-    // 当服务消费者接收到服务提供者响应的结果时,就会调用done()方法,并传入RpcResponse类型的协议对象，
-    // 此时会唤醒阻塞的线程获取响应的结果数据。
+    /**
+     * 当服务消费者接收到服务提供者响应的结果时,就会调用done()方法,并传入RpcResponse类型的协议对象,此时会唤醒阻塞的线程获取响应的结果数据。
+     */
     public void done(RpcProtocol<RpcResponse> responseRpcProtocol) {
         this.responseRpcProtocol = responseRpcProtocol;
         sync.release(1);

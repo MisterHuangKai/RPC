@@ -1,4 +1,4 @@
-package io.hk.rpc.consumer.common.callback;
+package io.hk.rpc.proxy.api.callback;
 
 /**
  * 异步回调接口

@@ -1,12 +1,11 @@
 package io.hk.rpc.test.consumer.handler;
 
 import io.hk.rpc.consumer.common.RpcConsumer;
-import io.hk.rpc.consumer.common.callback.AsyncRPCCallback;
-import io.hk.rpc.consumer.common.context.RpcContext;
-import io.hk.rpc.consumer.common.future.RPCFuture;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.header.RpcHeaderFactory;
 import io.hk.rpc.protocol.request.RpcRequest;
+import io.hk.rpc.proxy.api.callback.AsyncRPCCallback;
+import io.hk.rpc.proxy.api.future.RPCFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
