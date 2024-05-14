@@ -1,11 +1,16 @@
 package io.hk.rpc.proxy.api.object;
 
+import io.hk.rpc.protocol.RpcProtocol;
+import io.hk.rpc.protocol.header.RpcHeaderFactory;
+import io.hk.rpc.protocol.request.RpcRequest;
 import io.hk.rpc.proxy.api.consumer.Consumer;
+import io.hk.rpc.proxy.api.future.RPCFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 对象代理类
@@ -75,10 +80,49 @@ public class ObjectProxy<T> implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (Object.class == method.getDeclaringClass()) {
-
+            String name = method.getName();
+            switch (name) {
+                case "equals":
+                    return proxy == args[0];
+                case "hashCode":
+                    return System.identityHashCode(proxy);
+                case "toString":
+                    return proxy.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(proxy)) + ", with InvocationHandler " + this;
+                default:
+                    throw new IllegalStateException(String.valueOf(method));
+            }
         }
 
+        RpcRequest rpcRequest = new RpcRequest();
+        rpcRequest.setVersion(this.serviceVersion);
+        rpcRequest.setClassName(method.getDeclaringClass().getName());
+        rpcRequest.setMethodName(method.getName());
+        rpcRequest.setParameterTypes(method.getParameterTypes());
+        rpcRequest.setGroup(this.serviceGroup);
+        rpcRequest.setParameters(args);
+        rpcRequest.setAsync(async);
+        rpcRequest.setOneway(oneway);
 
-        return null;
+        RpcProtocol<RpcRequest> requestRpcProtocol = new RpcProtocol<>();
+        requestRpcProtocol.setHeader(RpcHeaderFactory.getRequestHeader(serializationType));
+        requestRpcProtocol.setBody(rpcRequest);
+
+        LOGGER.debug(method.getDeclaringClass().getName());
+        LOGGER.debug(method.getName());
+
+        if (method.getParameterTypes() != null && method.getParameterTypes().length > 0) {
+            for (int i = 0; i < method.getParameterTypes().length; ++i) {
+                LOGGER.debug(method.getParameterTypes()[i].getName());
+            }
+        }
+        if (args != null) {
+            for (Object arg : args) {
+                LOGGER.debug(arg.toString());
+            }
+        }
+
+        RPCFuture rpcFuture = this.consumer.sendRequest(requestRpcProtocol);
+        return rpcFuture == null ? null : timeout > 0 ? rpcFuture.get(timeout, TimeUnit.MILLISECONDS) : rpcFuture.get();
     }
+
 }
