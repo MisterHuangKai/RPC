@@ -13,6 +13,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>hk_consumer_common</module>
+        <module>hk_consumer_native</module>
     </modules>
 
     <properties>
