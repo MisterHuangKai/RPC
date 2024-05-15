@@ -3,6 +3,7 @@ package io.hk.rpc.proxy.api.object;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.header.RpcHeaderFactory;
 import io.hk.rpc.protocol.request.RpcRequest;
+import io.hk.rpc.proxy.api.async.IAsyncObjectProxy;
 import io.hk.rpc.proxy.api.consumer.Consumer;
 import io.hk.rpc.proxy.api.future.RPCFuture;
 import org.slf4j.Logger;
@@ -18,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @author HuangKai
  * @date 2024/5/13
  */
-public class ObjectProxy<T> implements InvocationHandler {
+public class ObjectProxy<T> implements InvocationHandler, IAsyncObjectProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObjectProxy.class);
 
@@ -125,4 +126,8 @@ public class ObjectProxy<T> implements InvocationHandler {
         return rpcFuture == null ? null : timeout > 0 ? rpcFuture.get(timeout, TimeUnit.MILLISECONDS) : rpcFuture.get();
     }
 
+    @Override
+    public RPCFuture call(String funcName, Object... args) {
+        return null;
+    }
 }
