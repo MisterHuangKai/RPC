@@ -128,6 +128,47 @@ public class ObjectProxy<T> implements InvocationHandler, IAsyncObjectProxy {
 
     @Override
     public RPCFuture call(String funcName, Object... args) {
-        return null;
+        RpcProtocol<RpcRequest> requestRpcProtocol = createRequest(this.clazz.getName(), funcName, args);
+        RPCFuture rpcFuture = null;
+        try {
+            rpcFuture = this.consumer.sendRequest(requestRpcProtocol);
+        } catch (Exception e) {
+            LOGGER.error("async all throws exception:{}", e);
+        }
+        return rpcFuture;
     }
+
+    private RpcProtocol<RpcRequest> createRequest(String className, String methodName, Object[] args) {
+        RpcProtocol<RpcRequest> requestRpcProtocol = new RpcProtocol<>();
+        requestRpcProtocol.setHeader(RpcHeaderFactory.getRequestHeader(serializationType));
+        RpcRequest  request = new RpcRequest();
+        request.setClassName(className);
+        request.setMethodName(methodName);
+        request.setParameters(args);
+        request.setVersion(this.serviceVersion);
+        request.setGroup(this.serviceGroup);
+
+        Class[] parameterTypes = new Class[args.length];
+        for (int i = 0; i < args.length; i++) {
+            parameterTypes[i] = getClassType(args[i]);
+        }
+        request.setParameterTypes(parameterTypes);
+        requestRpcProtocol.setBody(request);
+
+        LOGGER.debug(className);
+        LOGGER.debug(methodName);
+        for (int i = 0; i < parameterTypes.length; ++i) {
+            LOGGER.debug(parameterTypes[i].getName());
+        }
+        for (int i = 0; i < args.length; ++i) {
+
+        }
+
+
+
+    }
+
+    private Class getClassType(Object arg) {
+    }
+
 }
