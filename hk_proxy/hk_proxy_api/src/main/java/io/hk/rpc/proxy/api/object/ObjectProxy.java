@@ -141,12 +141,15 @@ public class ObjectProxy<T> implements InvocationHandler, IAsyncObjectProxy {
     private RpcProtocol<RpcRequest> createRequest(String className, String methodName, Object[] args) {
         RpcProtocol<RpcRequest> requestRpcProtocol = new RpcProtocol<>();
         requestRpcProtocol.setHeader(RpcHeaderFactory.getRequestHeader(serializationType));
-        RpcRequest  request = new RpcRequest();
+        RpcRequest request = new RpcRequest();
         request.setClassName(className);
         request.setMethodName(methodName);
         request.setParameters(args);
         request.setVersion(this.serviceVersion);
         request.setGroup(this.serviceGroup);
+
+//        request.setAsync(this.async);
+//        request.setOneway(this.oneway);
 
         Class[] parameterTypes = new Class[args.length];
         for (int i = 0; i < args.length; i++) {
@@ -157,18 +160,38 @@ public class ObjectProxy<T> implements InvocationHandler, IAsyncObjectProxy {
 
         LOGGER.debug(className);
         LOGGER.debug(methodName);
-        for (int i = 0; i < parameterTypes.length; ++i) {
-            LOGGER.debug(parameterTypes[i].getName());
+        for (Class parameterType : parameterTypes) {
+            LOGGER.debug(parameterType.getName());
         }
-        for (int i = 0; i < args.length; ++i) {
-
+        for (Object arg : args) {
+            LOGGER.debug(arg.toString());
         }
-
-
-
+        return requestRpcProtocol;
     }
 
-    private Class getClassType(Object arg) {
+    private Class<?> getClassType(Object obj) {
+        Class<?> classType = obj.getClass();
+        String typeName = classType.getName();
+        switch (typeName) {
+            case "java.lang.Byte":
+                return Byte.TYPE;
+            case "java.lang.Short":
+                return Short.TYPE;
+            case "java.lang.Integer":
+                return Integer.TYPE;
+            case "java.lang.Long":
+                return Long.TYPE;
+            case "java.lang.Float":
+                return Float.TYPE;
+            case "java.lang.Double":
+                return Double.TYPE;
+            case "java.lang.Character":
+                return Character.TYPE;
+            case "java.lang.Boolean":
+                return Boolean.TYPE;
+            default:
+                return classType;
+        }
     }
 
 }
