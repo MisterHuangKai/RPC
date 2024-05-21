@@ -3,7 +3,7 @@ package io.hk.rpc.provider.common.server;
 import io.hk.rpc.codec.RpcDecoder;
 import io.hk.rpc.codec.RpcEncoder;
 import io.hk.rpc.provider.common.handler.RpcProviderHandler;
-import io.hk.rpc.registry.RegistryService;
+import io.hk.rpc.registry.api.RegistryService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;

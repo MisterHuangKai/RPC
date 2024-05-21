@@ -1,12 +1,10 @@
-package io.hk.rpc.protocol;
+package io.hk.rpc.protocol.meta;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * @author binghe(公众号 ： 冰河技术)
- * @version 1.0.0
- * @description 服务元数据，注册到注册中心的元数据信息
+ * 服务元数据，注册到注册中心的元数据信息
  */
 public class ServiceMeta implements Serializable {
 
@@ -51,7 +49,7 @@ public class ServiceMeta implements Serializable {
         this.serviceAddr = serviceAddr;
         this.servicePort = servicePort;
         this.serviceGroup = serviceGroup;
-        this.weight = weight;
+//        this.weight = weight;
     }
 
     public int hashCode() {

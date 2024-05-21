@@ -5,7 +5,7 @@ import io.hk.rpc.annotation.RpcService;
 import io.hk.rpc.common.helper.RpcServiceHelper;
 import io.hk.rpc.common.scanner.ClassScanner;
 import io.hk.rpc.constants.RpcConstants;
-import io.hk.rpc.registry.RegistryService;
+import io.hk.rpc.registry.api.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

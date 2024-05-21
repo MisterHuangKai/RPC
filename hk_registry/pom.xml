@@ -15,6 +15,7 @@
 
     <modules>
         <module>hk_registry_api</module>
+        <module>hk_registry_zookeeper</module>
     </modules>
 
     <properties>

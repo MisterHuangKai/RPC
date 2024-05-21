@@ -1,11 +1,9 @@
-package io.hk.rpc.registry;
+package io.hk.rpc.registry.api.config;
 
 import java.io.Serializable;
 
 /**
- * @author binghe(公众号 ： 冰河技术)
- * @version 1.0.0
- * @description 注册配置类
+ * 注册配置类
  */
 public class RegistryConfig implements Serializable {
 
@@ -29,7 +27,7 @@ public class RegistryConfig implements Serializable {
     public RegistryConfig(String registryAddr, String registryType, String registryLoadBalanceType) {
         this.registryAddr = registryAddr;
         this.registryType = registryType;
-        this.registryLoadBalanceType = registryLoadBalanceType;
+//        this.registryLoadBalanceType = registryLoadBalanceType;
     }
 
     public String getRegistryAddr() {
