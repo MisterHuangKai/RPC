@@ -4,6 +4,8 @@ import io.hk.rpc.codec.RpcDecoder;
 import io.hk.rpc.codec.RpcEncoder;
 import io.hk.rpc.provider.common.handler.RpcProviderHandler;
 import io.hk.rpc.registry.api.RegistryService;
+import io.hk.rpc.registry.api.config.RegistryConfig;
+import io.hk.rpc.registry.zookeeper.ZookeeperRegistryService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -26,29 +28,49 @@ public class BaseServer implements Server {
 
     private final Logger logger = LoggerFactory.getLogger(BaseServer.class);
 
-    // 主机域名或者IP地址
-    private String host = "127.0.0.1";
-    // 端口号
-    private int port = 27110;
-    // 反射类型
+    /**
+     * 主机域名或者IP地址
+     */
+    protected String host = "127.0.0.1";
+    /**
+     * 端口号
+     */
+    protected int port = 27110;
+    /**
+     * 反射类型
+     */
     private String reflectType;
     //
     protected String serverRegistryHost;
     //
     protected int serverRegistryPort;
-    //
+    /**
+     * 服务注册与发现
+     */
     protected RegistryService registryService;
 
     // 存储的是实体类关系
     protected Map<String, Object> handlerMap = new HashMap<>();
 
-    public BaseServer(String serverAddress, String reflectType) {
+    public BaseServer(String serverAddress, String registryAddress, String registryType, String reflectType) {
         if (!StringUtils.isEmpty(serverAddress)) {
             String[] serverArray = serverAddress.split(":");
             this.host = serverArray[0];
             this.port = Integer.parseInt(serverArray[1]);
         }
         this.reflectType = reflectType;
+        this.registryService = this.getRegistryService(registryAddress, registryType);
+    }
+
+    private RegistryService getRegistryService(String registryAddress, String registryType) {
+        // todo 后续扩展支持SPI
+        RegistryService registryService = new ZookeeperRegistryService();
+        try {
+            registryService.init(new RegistryConfig(registryAddress, registryType, "1"));
+        } catch (Exception e) {
+            logger.error("RPC Server init error.", e);
+        }
+        return registryService;
     }
 
     @Override

@@ -1,10 +1,11 @@
-package io.hk.rpc.provider.common.Scanner;
+package io.hk.rpc.provider.common.scanner;
 
 import com.alibaba.fastjson.JSONObject;
 import io.hk.rpc.annotation.RpcService;
 import io.hk.rpc.common.helper.RpcServiceHelper;
 import io.hk.rpc.common.scanner.ClassScanner;
 import io.hk.rpc.constants.RpcConstants;
+import io.hk.rpc.protocol.meta.ServiceMeta;
 import io.hk.rpc.registry.api.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,16 +35,12 @@ public class RpcServiceScanner extends ClassScanner {
                 Class<?> clazz = Class.forName(className);
                 RpcService rpcService = clazz.getAnnotation(RpcService.class);
                 if (rpcService != null) {
-                    /*
                     //优先使用interfaceClass, interfaceClass的name为空，再使用interfaceClassName
                     ServiceMeta serviceMeta = new ServiceMeta(getServiceName(rpcService), rpcService.version(), rpcService.group(), host, port, getWeight(rpcService.weight()));
                     //将元数据注册到注册中心
                     registryService.register(serviceMeta);
+
                     handlerMap.put(RpcServiceHelper.buildServiceKey(serviceMeta.getServiceName(), serviceMeta.getServiceVersion(), serviceMeta.getServiceGroup()), clazz.newInstance());
-                    */
-                    String serviceName = getServiceName(rpcService);
-                    String key = RpcServiceHelper.buildServiceKey(serviceName, rpcService.version(), rpcService.group());
-                    handlerMap.put(key, clazz.newInstance());
                     LOGGER.info("scan key ===>>> {}", JSONObject.toJSONString(handlerMap.keySet()));
                 }
             } catch (Exception e) {
@@ -79,6 +76,5 @@ public class RpcServiceScanner extends ClassScanner {
         }
         return serviceName;
     }
-
 
 }

@@ -18,19 +18,6 @@
     </properties>
 
     <dependencies>
-
-<!--        <dependency>-->
-<!--            <groupId>org.hk</groupId>-->
-<!--            <artifactId>hk_cache</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.hk</groupId>-->
-<!--            <artifactId>hk_protocol</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
-
         <dependency>
             <groupId>org.hk</groupId>
             <artifactId>hk_registry_api</artifactId>
@@ -39,16 +26,13 @@
         <dependency>
             <groupId>org.hk</groupId>
             <artifactId>hk_codec</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${project.version}</version>
         </dependency>
-
-        <!--        <dependency>-->
-<!--            <groupId>org.hk</groupId>-->
-<!--            <artifactId>hk_threadpool</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
-
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_registry_zookeeper</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
