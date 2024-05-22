@@ -1,6 +1,5 @@
 package io.hk.rpc.registry.zookeeper;
 
-
 import io.hk.rpc.common.helper.RpcServiceHelper;
 import io.hk.rpc.protocol.meta.ServiceMeta;
 import io.hk.rpc.registry.api.RegistryService;
