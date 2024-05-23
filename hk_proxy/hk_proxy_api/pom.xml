@@ -28,6 +28,12 @@
             <artifactId>hk_spi</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_registry_api</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>
