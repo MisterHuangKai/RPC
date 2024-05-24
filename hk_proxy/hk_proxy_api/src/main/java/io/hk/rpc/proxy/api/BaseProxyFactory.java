@@ -20,7 +20,8 @@ public abstract class BaseProxyFactory<T> implements ProxyFactory {
     @Override
     public <T> void init(ProxyConfig<T> proxyConfig) {
         LOGGER.info("BaseProxyFactory: abstract class init method.");
-        this.objectProxy = new ObjectProxy(proxyConfig.getClazz(),
+        this.objectProxy = new ObjectProxy(
+                proxyConfig.getClazz(),
                 proxyConfig.getServiceVersion(),
                 proxyConfig.getServiceGroup(),
                 proxyConfig.getSerializationType(),

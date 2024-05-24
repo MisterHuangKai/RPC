@@ -66,7 +66,7 @@ public class RpcClient {
      *
      * @param registryAddress
      * @param registryType
-     * @return RegistryService
+     * @return registryService
      */
     private RegistryService getRegistryService(String registryAddress, String registryType) {
         if (StringUtils.isEmpty(registryType)){
@@ -85,12 +85,12 @@ public class RpcClient {
 
     public <T> T create(Class<T> clazz) {
         ProxyFactory proxyFactory = new JdkProxyFactory<T>();
-        proxyFactory.init(new ProxyConfig<>(clazz, serviceVersion, serviceGroup, serializationType, timeout, RpcConsumer.getInstance(), async, oneway));
+        proxyFactory.init(new ProxyConfig<>(clazz, serviceVersion, serviceGroup, serializationType, timeout, registryService, RpcConsumer.getInstance(), async, oneway));
         return proxyFactory.getProxy(clazz);
     }
 
     public <T> IAsyncObjectProxy createAsync(Class<T> clazz) {
-        return new ObjectProxy<T>(clazz, serviceVersion, serviceGroup, serializationType, timeout, RpcConsumer.getInstance(), async, oneway);
+        return new ObjectProxy<T>(clazz, serviceVersion, serviceGroup, serializationType, timeout, registryService, RpcConsumer.getInstance(), async, oneway);
     }
 
     public void shutdown() {
