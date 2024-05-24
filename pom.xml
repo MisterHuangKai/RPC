@@ -24,6 +24,7 @@
         <module>hk_codec</module>
         <module>hk_consumer</module>
         <module>hk_proxy</module>
+        <module>hk_loadbalancer</module>
     </modules>
 
     <properties>

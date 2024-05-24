@@ -1,6 +1,8 @@
 package io.hk.rpc.registry.zookeeper;
 
 import io.hk.rpc.common.helper.RpcServiceHelper;
+import io.hk.rpc.loadbalancer.api.ServiceLoadBalancer;
+import io.hk.rpc.loadbalancer.random.RandomServiceLoadBalancer;
 import io.hk.rpc.protocol.meta.ServiceMeta;
 import io.hk.rpc.registry.api.RegistryService;
 import io.hk.rpc.registry.api.config.RegistryConfig;
@@ -45,6 +47,11 @@ public class ZookeeperRegistryService implements RegistryService {
     private ServiceDiscovery<ServiceMeta> serviceDiscovery;
 
     /**
+     * 负载均衡接口
+     */
+    private ServiceLoadBalancer<ServiceInstance<ServiceMeta>> serviceLoadBalancer;
+
+    /**
      * 构建CuratorFramework客户端,并初始化serviceDiscovery
      */
     @Override
@@ -58,6 +65,8 @@ public class ZookeeperRegistryService implements RegistryService {
                 .basePath(ZK_BASE_PATH)
                 .build();
         this.serviceDiscovery.start();
+        // 基于随机算法的负载均衡策略
+        this.serviceLoadBalancer = new RandomServiceLoadBalancer<>();
     }
 
     /**
@@ -96,7 +105,7 @@ public class ZookeeperRegistryService implements RegistryService {
     @Override
     public ServiceMeta discovery(String serviceName, int invokerHashCode) throws Exception {
         Collection<ServiceInstance<ServiceMeta>> serviceInstances = serviceDiscovery.queryForInstances(serviceName);
-        ServiceInstance<ServiceMeta> instance = this.selectOneServiceInstance((List<ServiceInstance<ServiceMeta>>) serviceInstances);
+        ServiceInstance<ServiceMeta> instance = serviceLoadBalancer.select((List<ServiceInstance<ServiceMeta>>) serviceInstances, invokerHashCode);
         if (instance != null){
             return instance.getPayload();
         }
@@ -109,21 +118,6 @@ public class ZookeeperRegistryService implements RegistryService {
     @Override
     public void destroy() throws IOException {
         serviceDiscovery.close();
-    }
-
-    /**
-     * 从serviceInstances中随机返回一个元数据
-     *
-     * @param serviceInstances
-     * @return ServiceInstance<ServiceMeta>
-     */
-    private ServiceInstance<ServiceMeta> selectOneServiceInstance(List<ServiceInstance<ServiceMeta>> serviceInstances) {
-        if (serviceInstances == null || serviceInstances.isEmpty()) {
-            return null;
-        }
-        Random random = new Random();
-        int index = random.nextInt(serviceInstances.size());
-        return serviceInstances.get(index);
     }
 
 }
