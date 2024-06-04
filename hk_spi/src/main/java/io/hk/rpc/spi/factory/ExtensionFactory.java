@@ -4,9 +4,6 @@ import io.hk.rpc.spi.annotation.SPI;
 
 /**
  * 扩展类加载器的工厂接口
- *
- * @author HuangKai
- * @date 2024/5/29
  */
 @SPI("spi")
 public interface ExtensionFactory {

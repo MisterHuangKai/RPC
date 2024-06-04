@@ -18,7 +18,7 @@ package io.hk.rpc.spi.annotation;
 import java.lang.annotation.*;
 
 /**
- * @SPI, 标注到加入SPI机制的接口上
+ * 注解@SPI, 标注到加入SPI机制的接口上
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
