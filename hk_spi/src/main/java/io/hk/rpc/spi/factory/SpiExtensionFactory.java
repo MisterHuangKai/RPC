@@ -1,6 +1,7 @@
 package io.hk.rpc.spi.factory;
 
 import io.hk.rpc.spi.annotation.SPIClass;
+import io.hk.rpc.spi.loader.ExtensionLoader;
 
 import java.util.Optional;
 

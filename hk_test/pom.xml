@@ -16,6 +16,7 @@
         <module>ht_test_provider</module>
         <module>hk_test_consumer</module>
         <module>hk_test_registry</module>
+        <module>hk_test_spi</module>
     </modules>
 
     <properties>
