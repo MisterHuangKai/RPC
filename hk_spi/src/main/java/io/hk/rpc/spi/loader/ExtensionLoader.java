@@ -36,9 +36,9 @@ public final class ExtensionLoader<T> {
 
     private String cachedDefaultName;
 
-    private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<>();
+    private final Holder<Map<String, Class<?>>> holder = new Holder<>();
 
-    private final Map<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<>();
+    private final Map<String, Holder<Object>> strToHolderMap = new ConcurrentHashMap<>();
 
     private final Map<Class<?>, Object> spiClassInstances = new ConcurrentHashMap<>();
 
@@ -91,13 +91,13 @@ public final class ExtensionLoader<T> {
      * 2.(1)
      */
     public Map<String, Class<?>> getExtensionClasses() {
-        Map<String, Class<?>> classMap = cachedClasses.getValue();
+        Map<String, Class<?>> classMap = holder.getValue();
         if (Objects.isNull(classMap)) {
-            synchronized (cachedClasses) {
-                classMap = cachedClasses.getValue();
+            synchronized (holder) {
+                classMap = holder.getValue();
                 if (Objects.isNull(classMap)) {
                     classMap = loadExtensionClass();
-                    cachedClasses.setValue(classMap);
+                    holder.setValue(classMap);
                 }
             }
         }
@@ -115,15 +115,15 @@ public final class ExtensionLoader<T> {
                 cachedDefaultName = value;
             }
         }
-        Map<String, Class<?>> classes = new HashMap<>(16);
-        loadDirectory(classes);
-        return classes;
+        Map<String, Class<?>> classMap = new HashMap<>(16);
+        loadDirectory(classMap);
+        return classMap;
     }
 
     /**
      * 2.(3)
      */
-    private void loadDirectory(final Map<String, Class<?>> classes) {
+    private void loadDirectory(final Map<String, Class<?>> classMap) {
         for (String directory : SPI_DIRECTORIES) {
             String fileName = directory + clazz.getName();
             try {
@@ -131,7 +131,7 @@ public final class ExtensionLoader<T> {
                 if (Objects.nonNull(urlEnumeration)) {
                     while (urlEnumeration.hasMoreElements()) {
                         URL url = urlEnumeration.nextElement();
-                        loadResources(classes, url);
+                        loadResources(classMap, url);
                     }
                 }
             } catch (IOException e) {
@@ -143,7 +143,7 @@ public final class ExtensionLoader<T> {
     /**
      * 2.(4)
      */
-    private void loadResources(final Map<String, Class<?>> classes, final URL url) throws IOException {
+    private void loadResources(final Map<String, Class<?>> classMap, final URL url) throws IOException {
         try (InputStream inputStream = url.openStream()) {
             Properties properties = new Properties();
             properties.load(inputStream);
@@ -152,7 +152,7 @@ public final class ExtensionLoader<T> {
                 String classPath = (String) v;
                 if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(classPath)) {
                     try {
-                        loadClass(classes, name, classPath);
+                        loadClass(classMap, name, classPath);
                     } catch (ClassNotFoundException e) {
                         throw new IllegalStateException("load extension resources error", e);
                     }
@@ -166,7 +166,7 @@ public final class ExtensionLoader<T> {
     /**
      * 2.(5)
      */
-    private void loadClass(final Map<String, Class<?>> classes, final String name, final String classPath) throws ClassNotFoundException {
+    private void loadClass(final Map<String, Class<?>> classMap, final String name, final String classPath) throws ClassNotFoundException {
         Class<?> subClass = Objects.nonNull(this.classLoader) ? Class.forName(classPath, true, this.classLoader) : Class.forName(classPath);
         if (!clazz.isAssignableFrom(subClass)) {
             throw new IllegalStateException("load extension resources error," + subClass + " subType is not of " + clazz);
@@ -174,9 +174,9 @@ public final class ExtensionLoader<T> {
         if (!subClass.isAnnotationPresent(SPIClass.class)) {
             throw new IllegalStateException("load extension resources error," + subClass + " without @" + SPIClass.class + " annotation");
         }
-        Class<?> oldClass = classes.get(name);
+        Class<?> oldClass = classMap.get(name);
         if (Objects.isNull(oldClass)) {
-            classes.put(name, subClass);
+            classMap.put(name, subClass);
         } else if (!Objects.equals(oldClass, subClass)) {
             throw new IllegalStateException("load extension resources error, Duplicate class " + clazz.getName() + " name " + name + " on " + oldClass.getName() + " or " + subClass.getName());
         }
@@ -208,14 +208,14 @@ public final class ExtensionLoader<T> {
         if (StringUtils.isBlank(name)) {
             throw new NullPointerException("get spi class name is null.");
         }
-        Holder<Object> objectHolder = cachedInstances.get(name);
+        Holder<Object> objectHolder = strToHolderMap.get(name);
         if (Objects.isNull(objectHolder)) {
-            cachedInstances.putIfAbsent(name, new Holder<>());
-            objectHolder = cachedInstances.get(name);
+            strToHolderMap.putIfAbsent(name, new Holder<>());
+            objectHolder = strToHolderMap.get(name);
         }
         Object value = objectHolder.getValue();
         if (Objects.isNull(value)) {
-            synchronized (cachedInstances) {
+            synchronized (strToHolderMap) {
                 value = objectHolder.getValue();
                 if (Objects.isNull(value)) {
                     value = createExtension(name);
@@ -252,8 +252,8 @@ public final class ExtensionLoader<T> {
         if (extensionClassMap.isEmpty()) {
             return Collections.emptyList();
         }
-        if (Objects.equals(extensionClassMap.size(), cachedInstances.size())) {
-            return (List<T>) this.cachedInstances.values().stream().map(e -> e.getValue()).collect(Collectors.toList());
+        if (Objects.equals(extensionClassMap.size(), strToHolderMap.size())) {
+            return (List<T>) this.strToHolderMap.values().stream().map(e -> e.getValue()).collect(Collectors.toList());
         }
         List<T> instances = new ArrayList<>();
         extensionClassMap.forEach((name, v) -> {
