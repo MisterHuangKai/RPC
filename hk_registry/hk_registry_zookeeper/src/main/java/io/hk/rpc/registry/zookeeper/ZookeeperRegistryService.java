@@ -18,7 +18,6 @@ import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 
 /**
  * 基于Zookeeper的注册服务
@@ -56,6 +55,11 @@ public class ZookeeperRegistryService implements RegistryService {
      */
     @Override
     public void init(RegistryConfig registryConfig) throws Exception {
+        /**
+         * HK注释:
+         *      Apache Curator是一个用于Apache ZooKeeper的Java客户端库,它提供了许多高级功能,使得与ZooKeeper的交互变得更加容易和可靠。
+         *      虽然ZooKeeper提供了一个原生的Java客户端,但Apache Curator提供了一个更高级别的抽象,使得开发人员可以更容易地编写健壮地分布式应用程序。
+         */
         CuratorFramework client = CuratorFrameworkFactory.newClient(registryConfig.getRegistryAddr(), new ExponentialBackoffRetry(BASE_SLEEP_TIME_MS, MAX_RETRIES));
         client.start();
         JsonInstanceSerializer<ServiceMeta> serializer = new JsonInstanceSerializer<>(ServiceMeta.class);
