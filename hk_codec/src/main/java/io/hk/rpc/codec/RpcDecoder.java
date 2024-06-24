@@ -19,6 +19,7 @@ import java.util.List;
  * 实现 RPC解码
  */
 public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
+
     @Override
     public final void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         if (in.readableBytes() < RpcConstants.HEADER_TOTAL_LEN) {
@@ -57,11 +58,11 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
         header.setRequestId(requestId);
         header.setSerializationType(serializationType);
         header.setMsgLen(dataLength);
-        // todo Serialization是扩展点
-        Serialization jdkSerialization = getJdkSerialization();
+//        Serialization jdkSerialization = getJdkSerialization();
+        Serialization serialization = getSerialization(serializationType);
         switch (msgTypeEnum) {
             case REQUEST:
-                RpcRequest request = jdkSerialization.deserialize(data, RpcRequest.class);
+                RpcRequest request = serialization.deserialize(data, RpcRequest.class);
                 if (request != null) {
                     RpcProtocol<RpcRequest> protocol = new RpcProtocol<>();
                     protocol.setHeader(header);
@@ -70,7 +71,7 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
                 }
                 break;
             case RESPONSE:
-                RpcResponse response = jdkSerialization.deserialize(data, RpcResponse.class);
+                RpcResponse response = serialization.deserialize(data, RpcResponse.class);
                 if (response != null) {
                     RpcProtocol<RpcResponse> protocol = new RpcProtocol<>();
                     protocol.setHeader(header);
@@ -82,7 +83,6 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
                 // todo 心跳数据的处理方法
                 break;
         }
-
-
     }
+
 }

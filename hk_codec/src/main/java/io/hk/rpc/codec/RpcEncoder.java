@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
  * 实现 RPC编码
  */
 public class RpcEncoder extends MessageToByteEncoder<RpcProtocol<Object>> implements RpcCodec {
+
     @Override
     protected void encode(ChannelHandlerContext ctx, RpcProtocol<Object> protocol, ByteBuf byteBuf) throws Exception {
         RpcHeader header = protocol.getHeader();
@@ -23,9 +24,9 @@ public class RpcEncoder extends MessageToByteEncoder<RpcProtocol<Object>> implem
         byteBuf.writeLong(header.getRequestId());
         String serializationType = header.getSerializationType();
         byteBuf.writeBytes(SerializationUtils.paddingString(serializationType).getBytes(StandardCharsets.UTF_8));
-        // todo Serialization是扩展点
-        Serialization jdkSerialization = getJdkSerialization();
-        byte[] data = jdkSerialization.serialize(protocol.getBody());
+//        Serialization jdkSerialization = getJdkSerialization();
+        Serialization serialization = getSerialization(serializationType);
+        byte[] data = serialization.serialize(protocol.getBody());
         byteBuf.writeInt(data.length);
         byteBuf.writeBytes(data);
     }
