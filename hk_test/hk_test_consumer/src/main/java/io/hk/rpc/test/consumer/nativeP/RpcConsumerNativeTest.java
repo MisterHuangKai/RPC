@@ -23,7 +23,7 @@ public class RpcConsumerNativeTest {
 
     @Before
     public void initRpcClient() {
-        rpcClient = new RpcClient("127.0.0.1:2181", "zookeeper", "1.0.0", "hk", "jdk", 3000L, false, false);
+        rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "1.0.0", "hk", "jdk", 3000L, false, false);
     }
 
     @Test
@@ -35,7 +35,7 @@ public class RpcConsumerNativeTest {
     }
 
     public static void main(String[] args) {
-        RpcClient rpcClient = new RpcClient("127.0.0.1:2181", "zookeeper", "1.0.0", "hk", "jdk", 3000L, false, false);
+        RpcClient rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "1.0.0", "hk", "jdk", 3000L, false, false);
         DemoService demoService = rpcClient.create(DemoService.class);
         String result = demoService.hello("huangkai?");
         LOGGER.info("返回的结果数据===>>>" + result);
@@ -44,7 +44,7 @@ public class RpcConsumerNativeTest {
 
     @Test
     public void testAsyncInterfaceRpc() throws Exception {
-        RpcClient rpcClient = new RpcClient("127.0.0.1:2181", "zookeeper", "1.0.0", "hk", "jdk", 3000L, true, false);
+        RpcClient rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "1.0.0", "hk", "jdk", 3000L, true, false);
         IAsyncObjectProxy iAsyncObjectProxy = rpcClient.createAsync(DemoService.class);
         RPCFuture rpcFuture = iAsyncObjectProxy.call("hello", "HuangKai");
         LOGGER.info("返回的结果数据===>>>" + rpcFuture.get());

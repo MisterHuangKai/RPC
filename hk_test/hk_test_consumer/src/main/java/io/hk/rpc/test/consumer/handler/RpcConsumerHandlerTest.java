@@ -20,7 +20,7 @@ public class RpcConsumerHandlerTest {
         RpcConsumer rpcConsumer = RpcConsumer.getInstance();
 
         // 同步调用
-        RPCFuture rpcFuture = rpcConsumer.sendRequest(getRpcRequestProtocol());
+//        RPCFuture rpcFuture = rpcConsumer.sendRequest(getRpcRequestProtocol());
 
         // 异步调用
 //        rpcConsumer.sendRequest(getRpcRequestProtocol());
@@ -31,17 +31,17 @@ public class RpcConsumerHandlerTest {
 //        LOGGER.info("无需获取返回的结果数据.");
 
         // 回调方法
-        rpcFuture.addCallback(new AsyncRPCCallback() {
-            @Override
-            public void onSuccess(Object result) {
-                LOGGER.info("从服务消费者获取到的数据===>>>" + result);
-            }
-
-            @Override
-            public void onException(Exception e) {
-                LOGGER.info("抛出了异常===>>>" + e);
-            }
-        });
+//        rpcFuture.addCallback(new AsyncRPCCallback() {
+//            @Override
+//            public void onSuccess(Object result) {
+//                LOGGER.info("从服务消费者获取到的数据===>>>" + result);
+//            }
+//
+//            @Override
+//            public void onException(Exception e) {
+//                LOGGER.info("抛出了异常===>>>" + e);
+//            }
+//        });
         Thread.sleep(2000);
 
 //        LOGGER.info("从服务消费者获取到的数据===>>> " + rpcFuture.get());
