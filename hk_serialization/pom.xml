@@ -15,6 +15,7 @@
         <module>hk_serialization_api</module>
         <module>hk_serialization_jdk</module>
         <module>hk_serialization_json</module>
+        <module>hk_serialization_hessian2</module>
     </modules>
 
     <properties>
