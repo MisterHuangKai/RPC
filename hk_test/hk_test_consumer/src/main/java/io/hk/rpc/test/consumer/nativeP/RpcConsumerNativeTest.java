@@ -23,21 +23,13 @@ public class RpcConsumerNativeTest {
 
     @Before
     public void initRpcClient() {
-        rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "1.0.0", "hk", "hessian2", 3000L, false, false);
+        rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "1.0.0", "hk", "jdk", 3000L, false, false);
     }
 
     @Test
     public void testInterfaceRpc() {
         DemoService demoService = rpcClient.create(DemoService.class);
         String result = demoService.hello("huangDad");
-        LOGGER.info("返回的结果数据===>>>" + result);
-        rpcClient.shutdown();
-    }
-
-    public static void main(String[] args) {
-        RpcClient rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "1.0.0", "hk", "jdk", 3000L, false, false);
-        DemoService demoService = rpcClient.create(DemoService.class);
-        String result = demoService.hello("huangkai?");
         LOGGER.info("返回的结果数据===>>>" + result);
         rpcClient.shutdown();
     }
