@@ -22,8 +22,6 @@ public class Hessian2Serialization implements Serialization {
 
     /**
      * 序列化
-     *
-     * @param obj
      */
     @Override
     public <T> byte[] serialize(T obj) {
@@ -57,9 +55,6 @@ public class Hessian2Serialization implements Serialization {
 
     /**
      * 反序列化
-     *
-     * @param data
-     * @param clazz
      */
     @Override
     public <T> T deserialize(byte[] data, Class<T> clazz) {
@@ -78,7 +73,7 @@ public class Hessian2Serialization implements Serialization {
             throw new SerializerException(e.getMessage(), e);
         } finally {
             try {
-                if (null != hessian2Input) {
+                if (hessian2Input != null) {
                     hessian2Input.close();
                     byteArrayInputStream.close();
                 }

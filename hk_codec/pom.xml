@@ -35,6 +35,11 @@
         </dependency>
         <dependency>
             <groupId>org.hk</groupId>
+            <artifactId>hk_serialization_hessian2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hk</groupId>
             <artifactId>hk_protocol</artifactId>
             <version>${project.version}</version>
         </dependency>
