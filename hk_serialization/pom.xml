@@ -17,6 +17,7 @@
         <module>hk_serialization_json</module>
         <module>hk_serialization_hessian2</module>
         <module>hk_serialization_fst</module>
+        <module>hk_serialization_kryo</module>
     </modules>
 
 </project>

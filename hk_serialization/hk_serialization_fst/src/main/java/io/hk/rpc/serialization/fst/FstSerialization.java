@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Fast Serialization, 简称 FST.
- *
+ *<p>
  * FST比标准Java序列化更快更安全更少占用内存,线程安全,是一个性能优越的Java序列化库,适用于对性能有严苛要求的高并发和大数据处理场景.
  */
 public class FstSerialization implements Serialization {
