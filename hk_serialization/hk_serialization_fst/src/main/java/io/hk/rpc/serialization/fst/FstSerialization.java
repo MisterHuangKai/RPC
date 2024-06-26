@@ -3,6 +3,7 @@ package io.hk.rpc.serialization.fst;
 
 import io.hk.rpc.common.exception.SerializerException;
 import io.hk.rpc.serialization.api.Serialization;
+import io.hk.rpc.spi.annotation.SPIClass;
 import org.nustaq.serialization.FSTConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
  *<p>
  * FST比标准Java序列化更快更安全更少占用内存,线程安全,是一个性能优越的Java序列化库,适用于对性能有严苛要求的高并发和大数据处理场景.
  */
+@SPIClass
 public class FstSerialization implements Serialization {
 
     private final Logger logger = LoggerFactory.getLogger(FstSerialization.class);
