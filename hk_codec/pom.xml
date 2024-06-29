@@ -48,6 +48,11 @@
             <artifactId>hk_serialization_kryo</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_serialization_protostuff</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.hk</groupId>

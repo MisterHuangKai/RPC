@@ -57,7 +57,7 @@ public class KryoSerialization implements Serialization {
     public <T> T deserialize(byte[] data, Class<T> clazz) {
         logger.info("execute kryo deserialize...");
         if (data == null) {
-            throw new SerializerException("deserialize object is null.");
+            throw new SerializerException("deserialize data is null.");
         }
         Kryo kryo = new Kryo();
         kryo.setReferences(false);
