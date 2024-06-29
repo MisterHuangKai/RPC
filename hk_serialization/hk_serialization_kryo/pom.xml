@@ -19,8 +19,19 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <version>${kyro.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.hk</groupId>
             <artifactId>hk_serialization_api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_common</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
