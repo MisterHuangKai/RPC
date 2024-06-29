@@ -10,6 +10,7 @@ import io.hk.rpc.proxy.jdk.JdkProxyFactory;
 import io.hk.rpc.registry.api.RegistryService;
 import io.hk.rpc.registry.api.config.RegistryConfig;
 import io.hk.rpc.registry.zookeeper.ZookeeperRegistryService;
+import io.hk.rpc.spi.loader.ExtensionLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -25,6 +26,11 @@ public class RpcClient {
     private final Logger logger = LoggerFactory.getLogger(RpcClient.class);
 
     private RegistryService registryService;
+
+    /**
+     * 代理
+     */
+    private String proxy;
 
     /**
      * 服务版本号
@@ -51,7 +57,8 @@ public class RpcClient {
      */
     private boolean oneway;
 
-    public RpcClient(String registryAddress, String registryType, String serviceVersion, String serviceGroup, String serializationType, long timeout,  boolean async, boolean oneway) {
+    public RpcClient(String registryAddress, String registryType, String proxy, String serviceVersion, String serviceGroup, String serializationType, long timeout, boolean async, boolean oneway) {
+        this.proxy = proxy;
         this.serviceVersion = serviceVersion;
         this.serviceGroup = serviceGroup;
         this.serializationType = serializationType;
@@ -69,7 +76,7 @@ public class RpcClient {
      * @return registryService
      */
     private RegistryService getRegistryService(String registryAddress, String registryType) {
-        if (StringUtils.isEmpty(registryType)){
+        if (StringUtils.isEmpty(registryType)) {
             throw new IllegalArgumentException("registryType is null");
         }
         // todo 后续SPI扩展
@@ -83,8 +90,15 @@ public class RpcClient {
         return registryService;
     }
 
+    /**
+     * 基于SPI创建动态代理
+     *
+     * @param clazz
+     * @return <T> Class<T>
+     */
     public <T> T create(Class<T> clazz) {
-        ProxyFactory proxyFactory = new JdkProxyFactory<T>();
+//        ProxyFactory proxyFactory = new JdkProxyFactory<T>();
+        ProxyFactory proxyFactory = ExtensionLoader.getExtension(ProxyFactory.class, proxy);
         proxyFactory.init(new ProxyConfig<>(clazz, serviceVersion, serviceGroup, serializationType, timeout, registryService, RpcConsumer.getInstance(), async, oneway));
         return proxyFactory.getProxy(clazz);
     }
