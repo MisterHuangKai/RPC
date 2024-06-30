@@ -16,7 +16,10 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
     <dependencies>
+
+<!--        可能是引用了hk_consumer_common包,所以jdk、cglib的引用放在这里也行,放在hk_consumer_common包下也行-->
         <dependency>
             <groupId>org.hk</groupId>
             <artifactId>hk_proxy_jdk</artifactId>
@@ -24,9 +27,14 @@
         </dependency>
         <dependency>
             <groupId>org.hk</groupId>
+            <artifactId>hk_proxy_cglib</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hk</groupId>
             <artifactId>hk_consumer_common</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hk</groupId>

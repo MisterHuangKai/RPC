@@ -10,9 +10,6 @@ import java.lang.reflect.Proxy;
 
 /**
  * JDK 动态代理工厂类
- *
- * @author HuangKai
- * @date 2024/5/14
  */
 @SPIClass
 public class JdkProxyFactory<T> extends BaseProxyFactory<T> implements ProxyFactory {
