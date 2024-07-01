@@ -5,23 +5,24 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.hk</groupId>
-        <artifactId>hk_rpc</artifactId>
+        <artifactId>hk_proxy</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hk_proxy</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>hk_proxy_api</module>
-        <module>hk_proxy_jdk</module>
-        <module>hk_proxy_cglib</module>
-        <module>hk_proxy_javassist</module>
-    </modules>
+    <artifactId>hk_proxy_javassist</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_proxy_api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>

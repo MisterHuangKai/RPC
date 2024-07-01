@@ -19,7 +19,7 @@
 
     <dependencies>
 
-<!--        可能是引用了hk_consumer_common包,所以jdk、cglib的引用放在这里也行,放在hk_consumer_common包下也行-->
+        <!-- 可能是引用了hk_consumer_common包,所以jdk、cglib、javassist的引用放在这里也行,放在hk_consumer_common包下也行 -->
         <dependency>
             <groupId>org.hk</groupId>
             <artifactId>hk_proxy_jdk</artifactId>
@@ -28,6 +28,11 @@
         <dependency>
             <groupId>org.hk</groupId>
             <artifactId>hk_proxy_cglib</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_proxy_javassist</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -39,8 +44,7 @@
         <dependency>
             <groupId>org.hk</groupId>
             <artifactId>hk_registry_zookeeper</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
