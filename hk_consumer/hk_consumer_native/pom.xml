@@ -35,6 +35,11 @@
             <artifactId>hk_proxy_javassist</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_proxy_bytebuddy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.hk</groupId>
