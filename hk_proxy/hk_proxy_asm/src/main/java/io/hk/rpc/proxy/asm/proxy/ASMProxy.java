@@ -1,6 +1,7 @@
 package io.hk.rpc.proxy.asm.proxy;
 
 import io.hk.rpc.proxy.asm.classloader.ASMClassLoader;
+import io.hk.rpc.proxy.asm.factory.ASMGenerateProxyFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -8,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 自定义的ASM代理:
+ *
  * <p>
  * 作为代理类需要继承的父类,提供一个静态的newProxyInstance()方法,
  * newProxyInstance里面调用ASMProxyFactory生成字节码二进制流,
