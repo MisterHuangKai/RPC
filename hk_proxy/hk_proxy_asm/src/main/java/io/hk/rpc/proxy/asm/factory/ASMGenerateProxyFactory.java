@@ -6,6 +6,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -72,9 +73,33 @@ public class ASMGenerateProxyFactory {
         for (Class<?> anInterface : interfaces) {
             for (int i = 0; i < anInterface.getMethods().length; i++) {
                 String methodName = "_" + anInterface.getSimpleName() + "_" + i;
+                cw.visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, methodName, Type.getDescriptor(Method.class), null, null);
+            }
+        }
+    }
+
+    private static void addClinit(ClassWriter cw, Class<?>[] interfaces, String proxyClassName) {
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
+        mv.visitCode();
+        for (Class<?> anInterface : interfaces) {
+            for (int i = 0; i < anInterface.getMethods().length; i++) {
+                Method method = anInterface.getMethods()[i];
+                String methodName = "_" + anInterface.getSimpleName() + "_" + i;
+                mv.visitLdcInsn(anInterface.getName());
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(Class.class), "forName", "(Ljava/lang/String;)Ljava/lang/Class;", false);
+                mv.visitLdcInsn(method.getName());
+                if (method.getParameterCount() == 0) {
+                    mv.visitInsn(Opcodes.ACONST_NULL);
+                } else {
+                    switch (method.getParameterCount()) {
+                        case 0:
+                            mv.visitInsn(Opcodes.ACONST_NULL);
+                    }
+                }
 
             }
         }
+
     }
 
 
