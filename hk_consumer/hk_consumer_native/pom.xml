@@ -40,6 +40,11 @@
             <artifactId>hk_proxy_bytebuddy</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_proxy_asm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.hk</groupId>

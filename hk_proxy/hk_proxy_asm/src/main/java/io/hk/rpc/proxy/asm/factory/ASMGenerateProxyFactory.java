@@ -6,6 +6,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -47,6 +48,7 @@ public class ASMGenerateProxyFactory {
      * 1 aload_1
      * 2 invokespecial #1 <proxy/ASMProxy.<init> : (Ljava/lang/reflect/InvocationHandler;)V>
      * 5 return
+     *
      * @param cw
      */
     private static void createInit(ClassWriter cw) {
@@ -66,6 +68,7 @@ public class ASMGenerateProxyFactory {
 
     /**
      * 创建static字段
+     *
      * @param cw
      * @param interfaces
      */
@@ -92,15 +95,169 @@ public class ASMGenerateProxyFactory {
                     mv.visitInsn(Opcodes.ACONST_NULL);
                 } else {
                     switch (method.getParameterCount()) {
-                        case 0:
-                            mv.visitInsn(Opcodes.ACONST_NULL);
+                        case 1:
+                            mv.visitInsn(Opcodes.ICONST_1);
+                            break;
+                        case 2:
+                            mv.visitInsn(Opcodes.ICONST_2);
+                            break;
+                        case 3:
+                            mv.visitInsn(Opcodes.ICONST_3);
+                            break;
+                        default:
+                            mv.visitVarInsn(Opcodes.BIPUSH, method.getParameterCount());
+                            break;
+                    }
+                    mv.visitTypeInsn(Opcodes.ANEWARRAY, Type.getInternalName(Class.class));
+                    for (int paramIndex = 0; paramIndex < method.getParameterTypes().length; paramIndex++) {
+                        Class<?> parameter = method.getParameterTypes()[paramIndex];
+                        mv.visitInsn(Opcodes.DUP);
+                        switch (paramIndex) {
+                            case 0:
+                                mv.visitInsn(Opcodes.ICONST_0);
+                                break;
+                            case 1:
+                                mv.visitInsn(Opcodes.ICONST_1);
+                                break;
+                            case 2:
+                                mv.visitInsn(Opcodes.ICONST_2);
+                                break;
+                            case 3:
+                                mv.visitInsn(Opcodes.ICONST_3);
+                                break;
+                            default:
+                                mv.visitVarInsn(Opcodes.BIPUSH, paramIndex);
+                                break;
+                        }
+                        mv.visitLdcInsn(parameter.getName());
+                        mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(Class.class), "forName", "(Ljava/lang/String;)Ljava/lang/Class;", false);
+                        mv.visitInsn(Opcodes.AASTORE);
                     }
                 }
-
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(Class.class), "getMethod", "(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;", false);
+                mv.visitFieldInsn(Opcodes.PUTSTATIC, proxyClassName, methodName, Type.getDescriptor(Method.class));
             }
+            mv.visitInsn(Opcodes.RETURN);
         }
-
+        mv.visitMaxs(DEFAULT_NUM, DEFAULT_NUM);
+        mv.visitEnd();
     }
 
+    private static void addInterfacesImpl(ClassWriter cw, Class<?>[] interfaces, String proxyClassName) {
+        for (Class<?> anInterface : interfaces) {
+            for (int i = 0; i < anInterface.getMethods().length; i++) {
+                Method method = anInterface.getMethods()[i];
+                String methodName = "_" + anInterface.getSimpleName() + "_" + i;
+                MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, method.getName(), Type.getMethodDescriptor(method), null, new String[]{Type.getInternalName(Exception.class)});
+                mv.visitCode();
+                mv.visitVarInsn(Opcodes.ALOAD, 0);
+                // 这里的入参"invocationHandler",为 ASMProxy.InvocationHandler 的自定义的属性名,需要保持一致
+                mv.visitFieldInsn(Opcodes.GETFIELD, Type.getInternalName(ASMProxy.class), "invocationHandler", "Ljava/lang/reflect/InvocationHandler;");
+//                mv.visitFieldInsn(Opcodes.GETFIELD, Type.getInternalName(ASMProxy.class), "h", "Ljava/lang/reflect/InvocationHandler;");
+                mv.visitVarInsn(Opcodes.ALOAD, 0);
+                mv.visitFieldInsn(Opcodes.GETSTATIC, proxyClassName, methodName, Type.getDescriptor(Method.class));
+                switch (method.getParameterCount()) {
+                    case 0:
+                        mv.visitInsn(Opcodes.ICONST_0);
+                        break;
+                    case 1:
+                        mv.visitInsn(Opcodes.ICONST_1);
+                        break;
+                    case 2:
+                        mv.visitInsn(Opcodes.ICONST_2);
+                        break;
+                    case 3:
+                        mv.visitInsn(Opcodes.ICONST_3);
+                        break;
+                    default:
+                        mv.visitVarInsn(Opcodes.BIPUSH, method.getParameterCount());
+                        break;
+                }
+                mv.visitTypeInsn(Opcodes.ANEWARRAY, Type.getInternalName(Object.class));
+                //     * 12 dup
+                //     * 13 iconst_0
+                //     * 14 aload_1
+                //     * 15 aastore
+                for (int paramIndex = 0; paramIndex < method.getParameterCount(); paramIndex++) {
+                    mv.visitInsn(Opcodes.DUP);
+                    switch (paramIndex) {
+                        case 0:
+                            mv.visitInsn(Opcodes.ICONST_0);
+                            break;
+                        case 1:
+                            mv.visitInsn(Opcodes.ICONST_1);
+                            break;
+                        case 2:
+                            mv.visitInsn(Opcodes.ICONST_2);
+                            break;
+                        case 3:
+                            mv.visitInsn(Opcodes.ICONST_3);
+                            break;
+                        default:
+                            mv.visitVarInsn(Opcodes.BIPUSH, paramIndex);
+                            break;
+                    }
+                    mv.visitVarInsn(Opcodes.ALOAD, paramIndex + 1);
+                    mv.visitInsn(Opcodes.AASTORE);
+                }
+                //     * 20 invokeinterface #5 <java/lang/reflect/InvocationHandler.invoke : (Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;> count 4
+                //     * 25 checkcast #6 <java/lang/Boolean>
+                //     * 28 invokevirtual #7 <java/lang/Boolean.booleanValue : ()Z>
+                mv.visitMethodInsn(Opcodes.INVOKEINTERFACE,
+                        Type.getInternalName(InvocationHandler.class),
+                        "invoke",
+                        "(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;",
+                        true);
+                addReturn(mv, method.getReturnType());
+                mv.visitMaxs(DEFAULT_NUM, DEFAULT_NUM);
+                mv.visitEnd();
+            }
+        }
+    }
+
+    private static void addReturn(MethodVisitor mv, Class<?> returnType) {
+        if (returnType.isAssignableFrom(Void.class)) {
+            mv.visitInsn(Opcodes.RETURN);
+            return;
+        }
+        if (returnType.isAssignableFrom(boolean.class)) {
+            //      checkcast #6 <java/lang/Boolean>
+            //      * 28 invokevirtual #7 <java/lang/Boolean.booleanValue : ()Z>
+            mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(Boolean.class));
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(Boolean.class), "booleanValue", "()Z", false);
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if (returnType.isAssignableFrom(int.class)) {
+            mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(Integer.class));
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(Integer.class), "intValue", "()I", false);
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if (returnType.isAssignableFrom(long.class)) {
+            mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(Long.class));
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(Long.class), "longValue", "()J", false);
+            mv.visitInsn(Opcodes.LRETURN);
+        } else if (returnType.isAssignableFrom(short.class)) {
+            mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(Short.class));
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(Short.class), "shortValue", "()S", false);
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if (returnType.isAssignableFrom(byte.class)) {
+            mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(Byte.class));
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(Byte.class), "byteValue", "()B", false);
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if (returnType.isAssignableFrom(char.class)) {
+            mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(Character.class));
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(Character.class), "charValue", "()C", false);
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if (returnType.isAssignableFrom(float.class)) {
+            mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(Float.class));
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(Float.class), "floatValue", "()F", false);
+            mv.visitInsn(Opcodes.FRETURN);
+        } else if (returnType.isAssignableFrom(double.class)) {
+            mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(Double.class));
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(Double.class), "doubleValue", "()D", false);
+            mv.visitInsn(Opcodes.DRETURN);
+        } else {
+            mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(returnType));
+            mv.visitInsn(Opcodes.ARETURN);
+        }
+    }
 
 }

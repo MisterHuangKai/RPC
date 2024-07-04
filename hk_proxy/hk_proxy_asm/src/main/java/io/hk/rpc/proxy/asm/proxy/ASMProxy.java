@@ -17,14 +17,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ASMProxy {
 
+    // 属性名称 invocationHandler 很重要,需要在 ASMGenerateProxyFactory.addInterfacesImpl 配置。
     protected InvocationHandler invocationHandler;
+//    protected InvocationHandler h;
 
     // 代理类名计数器
     private static final AtomicInteger PROXY_CNT = new AtomicInteger(0);
 
     private static final String PROXY_CLASS_NAME_PRE = "$Proxy";
 
-    private ASMProxy(InvocationHandler handler) {
+    public ASMProxy(InvocationHandler handler) {
         invocationHandler = handler;
     }
 
