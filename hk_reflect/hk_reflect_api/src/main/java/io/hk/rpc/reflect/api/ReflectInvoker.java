@@ -19,15 +19,14 @@ package io.hk.rpc.reflect.api;
 import io.hk.rpc.spi.annotation.SPI;
 
 /**
- * @author binghe(公众号：冰河技术)
- * @version 1.0.0
- * @description 反射方法的调用接口
+ * 反射方法的调用接口
  */
 @SPI
 public interface ReflectInvoker {
 
     /**
      * 调用真实方法的SPI通用接口
+     *
      * @param serviceBean 方法所在的对象实例
      * @param serviceClass 方法所在对象实例的Class对象
      * @param methodName 方法的名称
@@ -37,4 +36,5 @@ public interface ReflectInvoker {
      * @throws Throwable 抛出的异常
      */
     Object invokeMethod(Object serviceBean, Class<?> serviceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws Throwable;
+
 }

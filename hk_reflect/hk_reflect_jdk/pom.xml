@@ -5,22 +5,29 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.hk</groupId>
-        <artifactId>hk_rpc</artifactId>
+        <artifactId>hk_reflect</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hk_reflect</artifactId>
-    <packaging>pom</packaging>
-
-    <modules>
-        <module>hk_reflect_api</module>
-        <module>hk_reflect_jdk</module>
-    </modules>
+    <artifactId>hk_reflect_jdk</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_spi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_reflect_api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>
