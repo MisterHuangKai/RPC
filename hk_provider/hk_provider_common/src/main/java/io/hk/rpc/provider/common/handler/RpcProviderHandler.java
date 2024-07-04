@@ -17,7 +17,6 @@ package io.hk.rpc.provider.common.handler;
 
 import io.hk.rpc.common.helper.RpcServiceHelper;
 import io.hk.rpc.common.threadpool.ServerThreadPool;
-import io.hk.rpc.constants.RpcConstants;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.enumeration.RpcStatus;
 import io.hk.rpc.protocol.enumeration.RpcType;
@@ -27,8 +26,6 @@ import io.hk.rpc.protocol.response.RpcResponse;
 import io.hk.rpc.reflect.api.ReflectInvoker;
 import io.hk.rpc.spi.loader.ExtensionLoader;
 import io.netty.channel.*;
-import net.sf.cglib.reflect.FastClass;
-import net.sf.cglib.reflect.FastMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,14 +111,5 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
 
         return this.reflectInvoker.invokeMethod(serviceBean, serviceClass, methodName, parameterTypes, parameters);
     }
-
-    // CGLib reflect
-    private Object invokeCGLibMethod(Object serviceBean, Class<?> serviceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws Throwable{
-        logger.info(" use CGLib reflect type to invoke method ...");
-        FastClass fastClass = FastClass.create(serviceClass);
-        FastMethod fastMethod = fastClass.getMethod(methodName, parameterTypes);
-        return fastMethod.invoke(serviceBean, parameters);
-    }
-
 
 }

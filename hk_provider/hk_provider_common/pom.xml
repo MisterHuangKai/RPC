@@ -39,6 +39,11 @@
             <artifactId>hk_reflect_jdk</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hk</groupId>
+            <artifactId>hk_reflect_cglib</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
     </dependencies>
 

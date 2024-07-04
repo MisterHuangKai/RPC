@@ -1,19 +1,19 @@
-package io.hk.rpc.reflect.jdk;
+package io.hk.rpc.reflect.cglib;
 
 import io.hk.rpc.reflect.api.ReflectInvoker;
 import io.hk.rpc.spi.annotation.SPIClass;
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
-
 /**
- * JDK反射调用方法的类
+ * Cglib反射调用方法的类
  */
 @SPIClass
-public class JdkReflectInvoker implements ReflectInvoker {
+public class CglibReflectInvoker implements ReflectInvoker {
 
-    private final Logger logger = LoggerFactory.getLogger(JdkReflectInvoker.class);
+    private final Logger logger = LoggerFactory.getLogger(CglibReflectInvoker.class);
 
     /**
      * 调用真实方法的SPI通用接口
@@ -28,12 +28,10 @@ public class JdkReflectInvoker implements ReflectInvoker {
      */
     @Override
     public Object invokeMethod(Object serviceBean, Class<?> serviceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws Throwable {
-        logger.info("use Jdk reflect type to invoke method ...");
-        Method method = serviceClass.getMethod(methodName, parameterTypes);
-        // 值为true则指示, 反射的对象在使用时应该取消Java语言访问检查。
-        // 值为false则指示, 反射的对象应该实施Java语言访问检查。
-        method.setAccessible(true);
-        return method.invoke(serviceBean, parameters);
+        logger.info("use Cglib reflect type to invoke method ...");
+        FastClass fastClass = FastClass.create(serviceClass);
+        FastMethod fastMethod = fastClass.getMethod(methodName, parameterTypes);
+        return fastMethod.invoke(serviceBean, parameters);
     }
 
 }
