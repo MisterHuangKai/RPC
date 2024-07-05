@@ -27,7 +27,7 @@ public class RegistryConfig implements Serializable {
     public RegistryConfig(String registryAddr, String registryType, String registryLoadBalanceType) {
         this.registryAddr = registryAddr;
         this.registryType = registryType;
-//        this.registryLoadBalanceType = registryLoadBalanceType;
+        this.registryLoadBalanceType = registryLoadBalanceType;
     }
 
     public String getRegistryAddr() {

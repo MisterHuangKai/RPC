@@ -1,13 +1,13 @@
 package io.hk.rpc.loadbalancer.api;
 
+import io.hk.rpc.spi.annotation.SPI;
+
 import java.util.List;
 
 /**
  * 负载均衡 接口
- *
- * @author HuangKai
- * @date 2024/5/24
  */
+@SPI
 public interface ServiceLoadBalancer<T> {
 
     /**

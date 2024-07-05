@@ -52,21 +52,21 @@ public class BaseServer implements Server {
     // 存储的是实体类关系
     protected Map<String, Object> handlerMap = new HashMap<>();
 
-    public BaseServer(String serverAddress, String registryAddress, String registryType, String reflectType) {
+    public BaseServer(String serverAddress, String registryAddress, String registryType, String registryLoadBalanceType, String reflectType) {
         if (!StringUtils.isEmpty(serverAddress)) {
             String[] serverArray = serverAddress.split(":");
             this.host = serverArray[0];
             this.port = Integer.parseInt(serverArray[1]);
         }
         this.reflectType = reflectType;
-        this.registryService = this.getRegistryService(registryAddress, registryType);
+        this.registryService = this.getRegistryService(registryAddress, registryType, registryLoadBalanceType);
     }
 
-    private RegistryService getRegistryService(String registryAddress, String registryType) {
-        // todo 后续扩展支持SPI
-        RegistryService registryService = new ZookeeperRegistryService();
+    private RegistryService getRegistryService(String registryAddress, String registryType, String registryLoadBalanceType) {
+        RegistryService registryService = null;
         try {
-            registryService.init(new RegistryConfig(registryAddress, registryType, "1"));
+            registryService = new ZookeeperRegistryService();
+            registryService.init(new RegistryConfig(registryAddress, registryType, registryLoadBalanceType));
         } catch (Exception e) {
             logger.error("RPC Server init error.", e);
         }

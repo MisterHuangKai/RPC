@@ -2,11 +2,11 @@ package io.hk.rpc.registry.zookeeper;
 
 import io.hk.rpc.common.helper.RpcServiceHelper;
 import io.hk.rpc.loadbalancer.api.ServiceLoadBalancer;
-import io.hk.rpc.loadbalancer.random.RandomServiceLoadBalancer;
 import io.hk.rpc.protocol.meta.ServiceMeta;
 import io.hk.rpc.registry.api.RegistryService;
 import io.hk.rpc.registry.api.config.RegistryConfig;
 
+import io.hk.rpc.spi.loader.ExtensionLoader;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
@@ -21,9 +21,6 @@ import java.util.List;
 
 /**
  * 基于Zookeeper的注册服务
- *
- * @author HuangKai
- * @date 2024/5/21
  */
 public class ZookeeperRegistryService implements RegistryService {
 
@@ -69,8 +66,8 @@ public class ZookeeperRegistryService implements RegistryService {
                 .basePath(ZK_BASE_PATH)
                 .build();
         this.serviceDiscovery.start();
-        // 基于随机算法的负载均衡策略
-        this.serviceLoadBalancer = new RandomServiceLoadBalancer<>();
+        // 基于SPI机制获取负载均衡策略
+        this.serviceLoadBalancer = ExtensionLoader.getExtension(ServiceLoadBalancer.class, registryConfig.getRegistryLoadBalanceType());
     }
 
     /**
@@ -110,7 +107,7 @@ public class ZookeeperRegistryService implements RegistryService {
     public ServiceMeta discovery(String serviceName, int invokerHashCode) throws Exception {
         Collection<ServiceInstance<ServiceMeta>> serviceInstances = serviceDiscovery.queryForInstances(serviceName);
         ServiceInstance<ServiceMeta> instance = serviceLoadBalancer.select((List<ServiceInstance<ServiceMeta>>) serviceInstances, invokerHashCode);
-        if (instance != null){
+        if (instance != null) {
             return instance.getPayload();
         }
         return null;

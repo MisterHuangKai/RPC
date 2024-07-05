@@ -1,0 +1,1 @@
+random=io.hk.rpc.loadbalancer.random.RandomServiceLoadBalancer
