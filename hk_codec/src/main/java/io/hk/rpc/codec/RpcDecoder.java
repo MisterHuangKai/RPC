@@ -79,8 +79,17 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
                     out.add(protocol);
                 }
                 break;
-            case HEARTBEAT:
-                // todo 心跳数据的处理方法
+            case HEARTBEAT_FROM_CONSUMER:
+                // 服务消费者发送给服务提供者的心跳数据
+                break;
+            case HEARTBEAT_TO_CONSUMER:
+                // 服务提供者响应服务消费者的心跳数据
+                break;
+            case HEARTBEAT_FROM_PROVIDER:
+                // 服务提供者发送给服务消费者的心跳数据
+                break;
+            case HEARTBEAT_TO_PROVIDER:
+                // 服务消费者响应服务提供者的心跳数据
                 break;
         }
     }

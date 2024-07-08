@@ -58,7 +58,7 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
     private RpcProtocol<RpcResponse> handlerMessage(RpcProtocol<RpcRequest> protocol) {
         RpcProtocol<RpcResponse> responseRpcProtocol = null;
         RpcHeader header = protocol.getHeader();
-        if (header.getMsgType() == (byte) RpcType.HEARTBEAT.getType()) { // 心跳消息
+        if (header.getMsgType() == (byte) RpcType.HEARTBEAT_TO_CONSUMER.getType()) { // 心跳消息
             responseRpcProtocol = handlerHeartbeatMessage(protocol, header);
         } else if (header.getMsgType() == (byte) RpcType.REQUEST.getType()) { // 请求消息
             responseRpcProtocol = handlerRequestMessage(protocol, header);
@@ -71,7 +71,7 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
      * 按照自定义网络传输协议,将消息体封装成pong消息返回给服务消费者.
      */
     private RpcProtocol<RpcResponse> handlerHeartbeatMessage(RpcProtocol<RpcRequest> protocol, RpcHeader header) {
-        header.setMsgType((byte) RpcType.HEARTBEAT.getType());
+        header.setMsgType((byte) RpcType.HEARTBEAT_TO_CONSUMER.getType());
         header.setStatus((byte) RpcStatus.SUCCESS.getCode());
         RpcRequest request = protocol.getBody();
         RpcResponse response = new RpcResponse();
