@@ -3,6 +3,7 @@ package io.hk.rpc.consumer.common.handler;
 import com.alibaba.fastjson.JSONObject;
 import io.hk.rpc.consumer.common.context.RpcContext;
 import io.hk.rpc.protocol.RpcProtocol;
+import io.hk.rpc.protocol.enumeration.RpcType;
 import io.hk.rpc.protocol.header.RpcHeader;
 import io.hk.rpc.protocol.request.RpcRequest;
 import io.hk.rpc.protocol.response.RpcResponse;
@@ -53,18 +54,46 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
     }
 
     /**
-     * 服务消费者,接收服务提供者响应的数据
+     * 接收服务提供者响应的数据,并调用handlerMessage()处理数据
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcResponse> protocol) throws Exception {
+        logger.info("服务消费者接收到的数据===>>>{}", JSONObject.toJSONString(protocol));
         if (protocol == null) {
             return;
         }
+        this.handlerMessage(protocol);
+    }
 
-        logger.info("服务消费者接收到的数据===>>>{}", JSONObject.toJSONString(protocol));
+    /**
+     * 判断服务提供者响应的结果数据类型是心跳消息还是响应消息。
+     * Ⅰ.心跳消息:调用handlerHeartbeatMessage()处理心跳消息;
+     * Ⅱ.响应消息:调用handlerResponseMessage()处理响应消息.
+     */
+    private void handlerMessage(RpcProtocol<RpcResponse> protocol) {
         RpcHeader header = protocol.getHeader();
-        long requestId = header.getRequestId();
+        if (header.getMsgType() == (byte) RpcType.HEARTBEAT.getType()) { // 心跳消息
+            this.handlerHeartbeatMessage(protocol);
+        } else if (header.getMsgType() == (byte) RpcType.RESPONSE.getType()) { // 响应消息
+            this.handlerResponseMessage(protocol, header);
+        }
+    }
 
+    /**
+     * Ⅰ.处理心跳消息
+     */
+    private void handlerHeartbeatMessage(RpcProtocol<RpcResponse> protocol) {
+        // 由于心跳是服务消费者向服务提供者发起,服务提供者接收到心跳消息后,会立即响应。所以在服务消费者接收到服务提供者响应的心跳消息后,可不必处理。
+        // 此处简单打印即可,实际场景可不做处理
+        logger.info("receive service provider heartbeat message:{}", protocol.getBody().getResult());
+    }
+
+    /**
+     * Ⅱ.处理响应消息
+     * 获取到响应的结果信息后,会唤醒阻塞的线程,向客户端响应数据
+     */
+    private void handlerResponseMessage(RpcProtocol<RpcResponse> protocol, RpcHeader header) {
+        long requestId = header.getRequestId();
         RPCFuture rpcFuture = pendingRPC.remove(requestId);
         if (rpcFuture != null) {
             rpcFuture.done(protocol);
@@ -112,8 +141,6 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
 
     /**
      * 返回一个new的RpcRuture
-     * @param protocol
-     * @return
      */
     private RPCFuture getRpcFuture(RpcProtocol<RpcRequest> protocol) {
         RPCFuture rpcFuture = new RPCFuture(protocol);

@@ -1,22 +1,8 @@
-/**
- * Copyright 2020-9999 the original author or authors.
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package io.hk.rpc.provider.common.handler;
 
 import io.hk.rpc.common.helper.RpcServiceHelper;
 import io.hk.rpc.common.threadpool.ServerThreadPool;
+import io.hk.rpc.constants.RpcConstants;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.enumeration.RpcStatus;
 import io.hk.rpc.protocol.enumeration.RpcType;
@@ -47,37 +33,80 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
         this.reflectInvoker = ExtensionLoader.getExtension(ReflectInvoker.class, reflectType);
     }
 
+    /**
+     * 接收服务消费者发送过来的信息,并调用handlerMessage()进行处理
+     */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcRequest> protocol) throws Exception {
-        logger.info("===>>> 调用RpcProviderHandler的channelRead0方法。");
+        logger.info("===>>> 调用RpcProviderHandler的channelRead0方法...");
         ServerThreadPool.submit(() -> {
-            RpcHeader header = protocol.getHeader();
-            header.setMsgType((byte) RpcType.RESPONSE.getType());
-            logger.debug("Receive request: " + header.getRequestId());
-            RpcRequest request = protocol.getBody();
-            RpcProtocol<RpcResponse> responseRpcProtocol = new RpcProtocol<>();
-            RpcResponse response = new RpcResponse();
-            try {
-                // 调用真实方法
-                Object result = handle(request);
-                response.setResult(result);
-                response.setAsync(request.getAsync());
-                response.setOneway(request.getOneway());
-                header.setStatus((byte) RpcStatus.SUCCESS.getCode());
-            } catch (Throwable throwable) {
-                response.setError(throwable.toString());
-                header.setStatus((byte) RpcStatus.FAIL.getCode());
-                logger.error("RPC Server handle request error ", throwable);
-            }
-            responseRpcProtocol.setHeader(header);
-            responseRpcProtocol.setBody(response);
+            RpcProtocol<RpcResponse> responseRpcProtocol = handlerMessage(protocol);
             ctx.writeAndFlush(responseRpcProtocol).addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                    logger.debug("Send response for request: " + header.getRequestId());
+                    logger.debug("Send response for request: " + protocol.getHeader().getRequestId());
                 }
             });
         });
+    }
+
+    /**
+     * 解析请求消息协议,通过消息头中的消息类型来判断是心跳消息还是请求消息。
+     * Ⅰ.心跳消息:调用handlerHeartbeatMessage()处理心跳消息;
+     * Ⅱ.请求消息:调用handlerRequestMessage()处理请求消息.
+     */
+    private RpcProtocol<RpcResponse> handlerMessage(RpcProtocol<RpcRequest> protocol) {
+        RpcProtocol<RpcResponse> responseRpcProtocol = null;
+        RpcHeader header = protocol.getHeader();
+        if (header.getMsgType() == (byte) RpcType.HEARTBEAT.getType()) { // 心跳消息
+            responseRpcProtocol = handlerHeartbeatMessage(protocol, header);
+        } else if (header.getMsgType() == (byte) RpcType.REQUEST.getType()) { // 请求消息
+            responseRpcProtocol = handlerRequestMessage(protocol, header);
+        }
+        return responseRpcProtocol;
+    }
+
+    /**
+     * Ⅰ.处理服务消费者发送过来的心跳消息:
+     * 按照自定义网络传输协议,将消息体封装成pong消息返回给服务消费者.
+     */
+    private RpcProtocol<RpcResponse> handlerHeartbeatMessage(RpcProtocol<RpcRequest> protocol, RpcHeader header) {
+        header.setMsgType((byte) RpcType.HEARTBEAT.getType());
+        header.setStatus((byte) RpcStatus.SUCCESS.getCode());
+        RpcRequest request = protocol.getBody();
+        RpcResponse response = new RpcResponse();
+        response.setResult(RpcConstants.HEARTBEAT_PONG);
+        response.setAsync(request.getAsync());
+        response.setOneway(request.getOneway());
+        RpcProtocol<RpcResponse> responseRpcProtocol = new RpcProtocol<>();
+        responseRpcProtocol.setHeader(header);
+        responseRpcProtocol.setBody(response);
+        return responseRpcProtocol;
+    }
+
+    /**
+     * Ⅱ.处理服务消费者发送过来的请求消息:
+     * 按照自定义网络传输协议,调用真实方法后,将结果封装成响应协议返回给服务消费者.
+     */
+    private RpcProtocol<RpcResponse> handlerRequestMessage(RpcProtocol<RpcRequest> protocol, RpcHeader header) {
+        header.setMsgType((byte) RpcType.RESPONSE.getType());
+        RpcRequest request = protocol.getBody();
+        RpcResponse response = new RpcResponse();
+        try {
+            Object result = handle(request);
+            response.setResult(result);
+            response.setAsync(request.getAsync());
+            response.setOneway(request.getOneway());
+            header.setStatus((byte) RpcStatus.SUCCESS.getCode());
+        } catch (Throwable t) {
+            response.setError(t.toString());
+            header.setStatus((byte) RpcStatus.FAIL.getCode());
+            logger.error("RPC Server handle request error ", t);
+        }
+        RpcProtocol<RpcResponse> responseRpcProtocol = new RpcProtocol<>();
+        responseRpcProtocol.setHeader(header);
+        responseRpcProtocol.setBody(response);
+        return responseRpcProtocol;
     }
 
     /**
@@ -108,7 +137,6 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
                 logger.debug("parameter: " + parameter.toString());
             }
         }
-
         return this.reflectInvoker.invokeMethod(serviceBean, serviceClass, methodName, parameterTypes, parameters);
     }
 
