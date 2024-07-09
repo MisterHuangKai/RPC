@@ -62,7 +62,7 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
         if (protocol == null) {
             return;
         }
-        this.handlerMessage(protocol);
+        this.handlerMessage(protocol, ctx.channel());
     }
 
     /**
@@ -70,10 +70,10 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
      * Ⅰ.心跳消息:调用handlerHeartbeatMessage()处理心跳消息;
      * Ⅱ.响应消息:调用handlerResponseMessage()处理响应消息.
      */
-    private void handlerMessage(RpcProtocol<RpcResponse> protocol) {
+    private void handlerMessage(RpcProtocol<RpcResponse> protocol, Channel channel) {
         RpcHeader header = protocol.getHeader();
         if (header.getMsgType() == (byte) RpcType.HEARTBEAT_TO_CONSUMER.getType()) { // 服务提供者响应的心跳消息
-            this.handlerHeartbeatMessage(protocol);
+            this.handlerHeartbeatMessage(protocol, channel);
         } else if (header.getMsgType() == (byte) RpcType.RESPONSE.getType()) { // 响应消息
             this.handlerResponseMessage(protocol, header);
         }
@@ -82,10 +82,10 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
     /**
      * Ⅰ.处理心跳消息
      */
-    private void handlerHeartbeatMessage(RpcProtocol<RpcResponse> protocol) {
+    private void handlerHeartbeatMessage(RpcProtocol<RpcResponse> protocol, Channel channel) {
         // 由于心跳是服务消费者向服务提供者发起,服务提供者接收到心跳消息后,会立即响应。所以在服务消费者接收到服务提供者响应的心跳消息后,可不必处理。
         // 此处简单打印即可,实际场景可不做处理
-        logger.info("receive service provider heartbeat message:{}", protocol.getBody().getResult());
+        logger.info("receive service provider heartbeat message, the provider is:{}, the heartbeat message is:{}", channel.remoteAddress(), protocol.getBody().getResult());
     }
 
     /**

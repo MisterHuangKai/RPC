@@ -1,6 +1,7 @@
 package io.hk.rpc.consumer.common.cache;
 
-import java.nio.channels.Channel;
+import io.netty.channel.Channel;
+
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 

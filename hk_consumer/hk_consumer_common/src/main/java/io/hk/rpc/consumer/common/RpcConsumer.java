@@ -5,6 +5,7 @@ import io.hk.rpc.common.threadpool.ClientThreadPool;
 import io.hk.rpc.consumer.common.handler.RpcConsumerHandler;
 import io.hk.rpc.consumer.common.helper.RpcConsumerHandlerHelper;
 import io.hk.rpc.consumer.common.initializer.RpcConsumerInitializer;
+import io.hk.rpc.consumer.common.manager.ConsumerConnectionManager;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.meta.ServiceMeta;
 import io.hk.rpc.protocol.request.RpcRequest;
@@ -20,6 +21,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 /**
  * 服务消费者
  */
@@ -33,10 +38,18 @@ public class RpcConsumer implements Consumer {
 
     private static volatile RpcConsumer instance;
 
+    /**
+     * 定时任务类型的线程池:
+     * 在服务消费者端会使用这个定时任务线程池向服务提供者定时发送心跳数据.
+     */
+    private ScheduledExecutorService executorService;
+
     private RpcConsumer() {
         bootstrap = new Bootstrap();
         eventLoopGroup = new NioEventLoopGroup(4);
         bootstrap.group(eventLoopGroup).channel(NioSocketChannel.class).handler(new RpcConsumerInitializer());
+
+        this.startHeartbeat();
     }
 
     public static RpcConsumer getInstance() {
@@ -95,6 +108,24 @@ public class RpcConsumer implements Consumer {
             }
         });
         return channelFuture.channel().pipeline().get(RpcConsumerHandler.class);
+    }
+
+    /**
+     * 1. 通过定时任务线程池调用ConsumerConnectionManager中的scanNotActiveChannel()方法,每隔60秒扫描并移除ConsumerChannelCache中不活跃的Channel.
+     * 2. 通过定时任务线程池调用ConsumerConnectionManager中的broadcastPingMessageFromConsumer()方法,每隔30秒向服务提供者发送心跳数据.
+     */
+    private void startHeartbeat(){
+        executorService = Executors.newScheduledThreadPool(2);
+
+        executorService.scheduleAtFixedRate(()->{
+            logger.info("============ scanNotActiveChannel ============");
+            ConsumerConnectionManager.scanNotActiveChannel();
+        }, 2, 60, TimeUnit.SECONDS); // HK: initialDelay:10,初始延迟10秒太久,不便于控制台中观察.所以改成2
+
+        executorService.scheduleAtFixedRate(()->{
+            logger.info("============ broadcastPingMessageFromConsumer ============");
+            ConsumerConnectionManager.broadcastPingMessageFromConsumer();
+        }, 1, 30, TimeUnit.SECONDS);  // HK: initialDelay:3,初始延迟3秒太久,不便于控制台中观察.所以改成1
     }
 
 }
