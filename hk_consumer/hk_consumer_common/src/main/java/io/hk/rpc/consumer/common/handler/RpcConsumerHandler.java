@@ -72,6 +72,7 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
      */
     private void handlerMessage(RpcProtocol<RpcResponse> protocol, Channel channel) {
         RpcHeader header = protocol.getHeader();
+        logger.info("RpcConsumerHandler.handlerMessage: MsgType:{}", header.getMsgType());
         if (header.getMsgType() == (byte) RpcType.HEARTBEAT_TO_CONSUMER.getType()) { // 服务提供者响应的心跳消息
             this.handlerHeartbeatMessage(protocol, channel);
         } else if (header.getMsgType() == (byte) RpcType.RESPONSE.getType()) { // 响应消息

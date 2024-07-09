@@ -25,6 +25,7 @@ public class ConsumerConnectionManager {
      */
     public static void scanNotActiveChannel() {
         Set<Channel> channelCache = ConsumerChannelCache.getChannelCache();
+        LOGGER.info("scanNotActiveChannel:{}", channelCache.size());
         if (channelCache == null || channelCache.isEmpty()) {
             return;
         }
@@ -42,6 +43,7 @@ public class ConsumerConnectionManager {
      */
     public static void broadcastPingMessageFromConsumer() {
         Set<Channel> channelCache = ConsumerChannelCache.getChannelCache();
+        LOGGER.info("broadcastPingMessageFromConsumer:{}", channelCache.size());
         if (channelCache == null || channelCache.isEmpty()) {
             return;
         }
