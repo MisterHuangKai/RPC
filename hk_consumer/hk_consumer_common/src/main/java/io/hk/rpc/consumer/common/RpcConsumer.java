@@ -43,8 +43,23 @@ public class RpcConsumer implements Consumer {
      * 在服务消费者端会使用这个定时任务线程池向服务提供者定时发送心跳数据.
      */
     private ScheduledExecutorService executorService;
+    /**
+     * 心跳间隔时间,默认30秒
+     */
+    private int heartbeatInterval = 30000;
+    /**
+     * 扫描并移除空闲连接时间,默认60秒
+     */
+    private int scanNotActiveChannelInterval = 60000;
 
-    private RpcConsumer() {
+    private RpcConsumer(int heartbeatInterval, int scanNotActiveChannelInterval) {
+        if(heartbeatInterval > 0) {
+            this.heartbeatInterval = heartbeatInterval;
+        }
+        if(scanNotActiveChannelInterval > 0) {
+            this.scanNotActiveChannelInterval = scanNotActiveChannelInterval;
+        }
+
         bootstrap = new Bootstrap();
         eventLoopGroup = new NioEventLoopGroup(4);
         bootstrap.group(eventLoopGroup).channel(NioSocketChannel.class).handler(new RpcConsumerInitializer());
@@ -52,11 +67,11 @@ public class RpcConsumer implements Consumer {
         this.startHeartbeat();
     }
 
-    public static RpcConsumer getInstance() {
+    public static RpcConsumer getInstance(int heartbeatInterval, int scanNotActiveChannelInterval) {
         if (instance == null) {
             synchronized (RpcConsumer.class) {
                 if (instance == null) {
-                    instance = new RpcConsumer();
+                    instance = new RpcConsumer(heartbeatInterval, scanNotActiveChannelInterval);
                 }
             }
         }
@@ -120,12 +135,12 @@ public class RpcConsumer implements Consumer {
         executorService.scheduleAtFixedRate(()->{
             logger.info("============ scanNotActiveChannel ============");
             ConsumerConnectionManager.scanNotActiveChannel();
-        }, 2, 60, TimeUnit.SECONDS); // HK: initialDelay:10,初始延迟10秒太久,不便于控制台中观察.所以改成2
+        }, 10, scanNotActiveChannelInterval, TimeUnit.MILLISECONDS);
 
         executorService.scheduleAtFixedRate(()->{
             logger.info("============ broadcastPingMessageFromConsumer ============");
             ConsumerConnectionManager.broadcastPingMessageFromConsumer();
-        }, 1, 30, TimeUnit.SECONDS);  // HK: initialDelay:3,初始延迟3秒太久,不便于控制台中观察.所以改成1
+        }, 3, heartbeatInterval, TimeUnit.MILLISECONDS);
     }
 
 }
