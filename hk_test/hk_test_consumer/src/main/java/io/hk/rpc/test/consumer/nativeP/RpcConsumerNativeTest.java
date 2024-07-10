@@ -23,7 +23,7 @@ public class RpcConsumerNativeTest {
 
     @Before
     public void initRpcClient() {
-        rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "random", "asm", "1.0.0", "hk", "protostuff", 3000L, false, false, 30000, 600000);
+        rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "random", "asm", "1.0.0", "hk", "protostuff", 3000L, false, false, 1000, 5000);
     }
 
     @Test

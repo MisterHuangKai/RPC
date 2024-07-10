@@ -40,7 +40,7 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcRequest> protocol) throws Exception {
         logger.info("===>>> 调用RpcProviderHandler的channelRead0方法...");
         ServerThreadPool.submit(() -> {
-            RpcProtocol<RpcResponse> responseRpcProtocol = handlerMessage(protocol);
+            RpcProtocol<RpcResponse> responseRpcProtocol = handlerMessage(protocol, ctx.channel());
             ctx.writeAndFlush(responseRpcProtocol).addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture channelFuture) throws Exception {
@@ -52,14 +52,18 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
 
     /**
      * 解析请求消息协议,通过消息头中的消息类型来判断是心跳消息还是请求消息。
-     * Ⅰ.心跳消息:调用handlerHeartbeatMessage()处理心跳消息;
-     * Ⅱ.请求消息:调用handlerRequestMessage()处理请求消息.
+     * Ⅰ.服务消费者发送的心跳消息;
+     * Ⅱ.服务消费者响应的心跳消息;
+     * Ⅲ.请求消息:正常的rpc请求.
      */
-    private RpcProtocol<RpcResponse> handlerMessage(RpcProtocol<RpcRequest> protocol) {
+    private RpcProtocol<RpcResponse> handlerMessage(RpcProtocol<RpcRequest> protocol, Channel channel) {
         RpcProtocol<RpcResponse> responseRpcProtocol = null;
         RpcHeader header = protocol.getHeader();
-        if (header.getMsgType() == (byte) RpcType.HEARTBEAT_TO_CONSUMER.getType()) { // 心跳消息
-            responseRpcProtocol = handlerHeartbeatMessage(protocol, header);
+        logger.info("RpcProviderHandler.handlerMessage: MsgType:{}", header.getMsgType());
+        if (header.getMsgType() == (byte) RpcType.HEARTBEAT_FROM_CONSUMER.getType()) { // 服务消费者发送的心跳消息
+            responseRpcProtocol = handlerHeartbeatMessageFromConsumer(protocol, header);
+        } else if (header.getMsgType() == (byte) RpcType.HEARTBEAT_TO_PROVIDER.getType()) { // 服务消费者响应的心跳消息
+            handlerHeartbeatMessageToProvider(protocol, channel);
         } else if (header.getMsgType() == (byte) RpcType.REQUEST.getType()) { // 请求消息
             responseRpcProtocol = handlerRequestMessage(protocol, header);
         }
@@ -70,7 +74,7 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
      * Ⅰ.处理服务消费者发送过来的心跳消息:
      * 按照自定义网络传输协议,将消息体封装成pong消息返回给服务消费者.
      */
-    private RpcProtocol<RpcResponse> handlerHeartbeatMessage(RpcProtocol<RpcRequest> protocol, RpcHeader header) {
+    private RpcProtocol<RpcResponse> handlerHeartbeatMessageFromConsumer(RpcProtocol<RpcRequest> protocol, RpcHeader header) {
         header.setMsgType((byte) RpcType.HEARTBEAT_TO_CONSUMER.getType());
         header.setStatus((byte) RpcStatus.SUCCESS.getCode());
         RpcRequest request = protocol.getBody();
@@ -85,7 +89,14 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
     }
 
     /**
-     * Ⅱ.处理服务消费者发送过来的请求消息:
+     * Ⅱ.接收服务消费者响应的心跳结果数据
+     */
+    private void handlerHeartbeatMessageToProvider(RpcProtocol<RpcRequest> protocol, Channel channel) {
+        logger.info("receive service consumer heartbeat message, the consumer is: {}, the heartbeat message is: {}", channel.remoteAddress(), protocol.getBody().getParameters()[0]);
+    }
+
+    /**
+     * Ⅲ.处理服务消费者发送过来的请求消息:
      * 按照自定义网络传输协议,调用真实方法后,将结果封装成响应协议返回给服务消费者.
      */
     private RpcProtocol<RpcResponse> handlerRequestMessage(RpcProtocol<RpcRequest> protocol, RpcHeader header) {

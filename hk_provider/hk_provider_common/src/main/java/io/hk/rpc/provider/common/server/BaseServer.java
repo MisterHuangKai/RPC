@@ -3,6 +3,7 @@ package io.hk.rpc.provider.common.server;
 import io.hk.rpc.codec.RpcDecoder;
 import io.hk.rpc.codec.RpcEncoder;
 import io.hk.rpc.provider.common.handler.RpcProviderHandler;
+import io.hk.rpc.provider.common.manager.ProviderConnectionManager;
 import io.hk.rpc.registry.api.RegistryService;
 import io.hk.rpc.registry.api.config.RegistryConfig;
 import io.hk.rpc.registry.zookeeper.ZookeeperRegistryService;
@@ -18,8 +19,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 基础服务
@@ -44,6 +50,10 @@ public class BaseServer implements Server {
     protected String serverRegistryHost;
     //
     protected int serverRegistryPort;
+    /**
+     * 心跳定时任务线程池
+     */
+    private ScheduledExecutorService executorService;
     /**
      * 服务注册与发现
      */
@@ -73,8 +83,24 @@ public class BaseServer implements Server {
         return registryService;
     }
 
+    /**
+     * 启动定时任务,定时扫描并移除不活跃连接,定时向服务消费者发送心跳
+     */
+    private void startHeartbeat() {
+        executorService = Executors.newScheduledThreadPool(2);
+
+        executorService.scheduleAtFixedRate(() -> {
+            ProviderConnectionManager.scanNotActiveChannel();
+        }, 10, 6000, TimeUnit.MILLISECONDS);
+
+        executorService.scheduleAtFixedRate(() -> {
+            ProviderConnectionManager.broadcastPingMessageFromProvider();
+        }, 3, 3000, TimeUnit.MILLISECONDS);
+    }
+
     @Override
     public void startNettyServer() {
+        this.startHeartbeat();
         // 启动netty服务的经典代码模板
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();

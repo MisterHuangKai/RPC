@@ -1,8 +1,10 @@
 package io.hk.rpc.consumer.common.handler;
 
 import com.alibaba.fastjson.JSONObject;
+import io.hk.rpc.constants.RpcConstants;
 import io.hk.rpc.consumer.common.context.RpcContext;
 import io.hk.rpc.protocol.RpcProtocol;
+import io.hk.rpc.protocol.enumeration.RpcStatus;
 import io.hk.rpc.protocol.enumeration.RpcType;
 import io.hk.rpc.protocol.header.RpcHeader;
 import io.hk.rpc.protocol.request.RpcRequest;
@@ -67,30 +69,49 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
 
     /**
      * 判断服务提供者响应的结果数据类型是心跳消息还是响应消息。
-     * Ⅰ.心跳消息:调用handlerHeartbeatMessage()处理心跳消息;
-     * Ⅱ.响应消息:调用handlerResponseMessage()处理响应消息.
+     * Ⅰ.服务提供者响应的心跳消息;
+     * Ⅱ.服务提供者发送的心跳消息;
+     * Ⅲ.响应消息:正常的rpc请求.
      */
     private void handlerMessage(RpcProtocol<RpcResponse> protocol, Channel channel) {
         RpcHeader header = protocol.getHeader();
         logger.info("RpcConsumerHandler.handlerMessage: MsgType:{}", header.getMsgType());
         if (header.getMsgType() == (byte) RpcType.HEARTBEAT_TO_CONSUMER.getType()) { // 服务提供者响应的心跳消息
-            this.handlerHeartbeatMessage(protocol, channel);
+            this.handlerHeartbeatMessageToConsumer(protocol, channel);
+        } else if (header.getMsgType() == (byte) RpcType.HEARTBEAT_FROM_PROVIDER.getType()) { // 服务提供者发送的心跳消息
+            this.handlerHeartbeatMessageFromProvider(protocol, channel);
         } else if (header.getMsgType() == (byte) RpcType.RESPONSE.getType()) { // 响应消息
             this.handlerResponseMessage(protocol, header);
         }
     }
 
     /**
-     * Ⅰ.处理心跳消息
+     * Ⅰ.处理服务提供者响应的心跳消息
      */
-    private void handlerHeartbeatMessage(RpcProtocol<RpcResponse> protocol, Channel channel) {
+    private void handlerHeartbeatMessageToConsumer(RpcProtocol<RpcResponse> protocol, Channel channel) {
         // 由于心跳是服务消费者向服务提供者发起,服务提供者接收到心跳消息后,会立即响应。所以在服务消费者接收到服务提供者响应的心跳消息后,可不必处理。
         // 此处简单打印即可,实际场景可不做处理
         logger.info("receive service provider heartbeat message, the provider is:{}, the heartbeat message is:{}", channel.remoteAddress(), protocol.getBody().getResult());
     }
 
     /**
-     * Ⅱ.处理响应消息
+     * Ⅱ.处理服务提供者发送的心跳消息
+     * 接收服务提供者发送过来的心跳ping消息,并响应pong消息
+     */
+    private void handlerHeartbeatMessageFromProvider(RpcProtocol<RpcResponse> protocol, Channel channel) {
+        RpcHeader header = protocol.getHeader();
+        header.setMsgType((byte) RpcType.HEARTBEAT_TO_PROVIDER.getType());
+        header.setStatus((byte) RpcStatus.SUCCESS.getCode());
+        RpcRequest request = new RpcRequest();
+        request.setParameters(new Object[]{RpcConstants.HEARTBEAT_PONG});
+        RpcProtocol<RpcRequest> requestRpcProtocol = new RpcProtocol<>();
+        requestRpcProtocol.setHeader(header);
+        requestRpcProtocol.setBody(request);
+        channel.writeAndFlush(requestRpcProtocol);
+    }
+
+    /**
+     * Ⅲ.处理响应消息
      * 获取到响应的结果信息后,会唤醒阻塞的线程,向客户端响应数据
      */
     private void handlerResponseMessage(RpcProtocol<RpcResponse> protocol, RpcHeader header) {

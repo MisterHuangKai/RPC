@@ -133,12 +133,10 @@ public class RpcConsumer implements Consumer {
         executorService = Executors.newScheduledThreadPool(2);
 
         executorService.scheduleAtFixedRate(()->{
-            logger.info("============ scanNotActiveChannel ============");
             ConsumerConnectionManager.scanNotActiveChannel();
         }, 10, scanNotActiveChannelInterval, TimeUnit.MILLISECONDS);
 
         executorService.scheduleAtFixedRate(()->{
-            logger.info("============ broadcastPingMessageFromConsumer ============");
             ConsumerConnectionManager.broadcastPingMessageFromConsumer();
         }, 3, heartbeatInterval, TimeUnit.MILLISECONDS);
     }

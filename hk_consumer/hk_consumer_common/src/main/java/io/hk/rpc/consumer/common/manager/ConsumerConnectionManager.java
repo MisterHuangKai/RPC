@@ -11,6 +11,8 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 /**
@@ -25,13 +27,13 @@ public class ConsumerConnectionManager {
      */
     public static void scanNotActiveChannel() {
         Set<Channel> channelCache = ConsumerChannelCache.getChannelCache();
-        LOGGER.info("scanNotActiveChannel:{}", channelCache.size());
+        LOGGER.info("============ scanNotActiveChannel ============ size:{}, time:{}", channelCache.size(), DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(LocalDateTime.now()));
         if (channelCache == null || channelCache.isEmpty()) {
             return;
         }
         channelCache.stream().forEach(channel -> {
             if (!channel.isOpen() || !channel.isActive()) {
-                LOGGER.info("scan Not Active Channel:{}", channel.remoteAddress());
+                LOGGER.info("ConsumerConnectionManager. scan Not Active Channel:{}", channel.remoteAddress());
                 channel.close();
                 ConsumerChannelCache.remove(channel);
             }
@@ -43,7 +45,7 @@ public class ConsumerConnectionManager {
      */
     public static void broadcastPingMessageFromConsumer() {
         Set<Channel> channelCache = ConsumerChannelCache.getChannelCache();
-        LOGGER.info("broadcastPingMessageFromConsumer:{}", channelCache.size());
+        LOGGER.info("============ broadcastPingMessageFromConsumer ============ size:{}, time:{}", channelCache.size(), DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(LocalDateTime.now()));
         if (channelCache == null || channelCache.isEmpty()) {
             return;
         }
