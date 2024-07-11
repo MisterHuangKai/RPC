@@ -51,6 +51,14 @@ public class BaseServer implements Server {
     //
     protected int serverRegistryPort;
     /**
+     * 心跳间隔时间,默认30秒
+     */
+    private int heartbeatInterval = 30000;
+    /**
+     * 扫描并移除空闲连接时间,默认60秒
+     */
+    private int scanNotActiveChannelInterval = 60000;
+    /**
      * 心跳定时任务线程池
      */
     private ScheduledExecutorService executorService;
@@ -62,13 +70,19 @@ public class BaseServer implements Server {
     // 存储的是实体类关系
     protected Map<String, Object> handlerMap = new HashMap<>();
 
-    public BaseServer(String serverAddress, String registryAddress, String registryType, String registryLoadBalanceType, String reflectType) {
+    public BaseServer(String serverAddress, String registryAddress, String registryType, String registryLoadBalanceType, String reflectType, int heartbeatInterval, int scanNotActiveChannelInterval) {
         if (!StringUtils.isEmpty(serverAddress)) {
             String[] serverArray = serverAddress.split(":");
             this.host = serverArray[0];
             this.port = Integer.parseInt(serverArray[1]);
         }
         this.reflectType = reflectType;
+        if(heartbeatInterval > 0){
+            this.heartbeatInterval = heartbeatInterval;
+        }
+        if(scanNotActiveChannelInterval > 0){
+            this.scanNotActiveChannelInterval = scanNotActiveChannelInterval;
+        }
         this.registryService = this.getRegistryService(registryAddress, registryType, registryLoadBalanceType);
     }
 
@@ -91,11 +105,11 @@ public class BaseServer implements Server {
 
         executorService.scheduleAtFixedRate(() -> {
             ProviderConnectionManager.scanNotActiveChannel();
-        }, 10, 6000, TimeUnit.MILLISECONDS);
+        }, 10, scanNotActiveChannelInterval, TimeUnit.MILLISECONDS);
 
         executorService.scheduleAtFixedRate(() -> {
             ProviderConnectionManager.broadcastPingMessageFromProvider();
-        }, 3, 3000, TimeUnit.MILLISECONDS);
+        }, 3, heartbeatInterval, TimeUnit.MILLISECONDS);
     }
 
     @Override
