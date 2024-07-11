@@ -9,6 +9,7 @@ import io.hk.rpc.protocol.enumeration.RpcType;
 import io.hk.rpc.protocol.header.RpcHeader;
 import io.hk.rpc.protocol.request.RpcRequest;
 import io.hk.rpc.protocol.response.RpcResponse;
+import io.hk.rpc.provider.common.cache.ProviderChannelCache;
 import io.hk.rpc.reflect.api.ReflectInvoker;
 import io.hk.rpc.spi.loader.ExtensionLoader;
 import io.netty.channel.*;
@@ -31,6 +32,30 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
     public RpcProviderHandler(String reflectType, Map<String, Object> handlerMap) {
         this.handlerMap = handlerMap;
         this.reflectInvoker = ExtensionLoader.getExtension(ReflectInvoker.class, reflectType);
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+        ProviderChannelCache.add(ctx.channel());
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        ProviderChannelCache.remove(ctx.channel());
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelUnregistered(ctx);
+        ProviderChannelCache.remove(ctx.channel());
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        logger.error("server caught exception", cause);
+        ProviderChannelCache.remove(ctx.channel());
+        ctx.close();
     }
 
     /**

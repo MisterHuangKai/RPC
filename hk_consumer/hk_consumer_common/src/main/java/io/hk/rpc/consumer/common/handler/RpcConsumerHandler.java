@@ -2,6 +2,7 @@ package io.hk.rpc.consumer.common.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import io.hk.rpc.constants.RpcConstants;
+import io.hk.rpc.consumer.common.cache.ConsumerChannelCache;
 import io.hk.rpc.consumer.common.context.RpcContext;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.enumeration.RpcStatus;
@@ -35,24 +36,34 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
     // 存储 请求ID与RpcResponse协议的映射关系
     private Map<Long, RPCFuture> pendingRPC = new ConcurrentHashMap<>(); // 实现异步转同步的关键
 
-    public Channel getChannel() {
-        return channel;
-    }
-
-    public SocketAddress getRemotePeer() {
-        return remotePeer;
-    }
-
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         this.remotePeer = this.channel.remoteAddress();
+        ConsumerChannelCache.add(channel);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        ConsumerChannelCache.remove(ctx.channel());
     }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
         this.channel = ctx.channel();
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelUnregistered(ctx);
+        ConsumerChannelCache.remove(ctx.channel());
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
     }
 
     /**
@@ -174,6 +185,14 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
 
     public void close() {
         channel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+    }
+
+    public Channel getChannel() {
+        return channel;
+    }
+
+    public SocketAddress getRemotePeer() {
+        return remotePeer;
     }
 
 }
