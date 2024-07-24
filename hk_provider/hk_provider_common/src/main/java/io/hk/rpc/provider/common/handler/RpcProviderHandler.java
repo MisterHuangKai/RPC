@@ -76,9 +76,9 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
     }
 
     /**
-     * 解析请求消息协议,通过消息头中的消息类型来判断是心跳消息还是请求消息。
-     * Ⅰ.服务消费者发送的心跳消息;
-     * Ⅱ.服务消费者响应的心跳消息;
+     * 解析请求消息协议,通过消息头中的消息类型来判断是心跳消息还是请求消息:<p>
+     * Ⅰ.服务消费者发送的心跳消息;<p>
+     * Ⅱ.服务消费者响应的心跳消息;<p>
      * Ⅲ.请求消息:正常的rpc请求.
      */
     private RpcProtocol<RpcResponse> handlerMessage(RpcProtocol<RpcRequest> protocol, Channel channel) {
@@ -96,7 +96,7 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
     }
 
     /**
-     * Ⅰ.处理服务消费者发送过来的心跳消息:
+     * Ⅰ.处理服务消费者发送过来的心跳消息:<p>
      * 按照自定义网络传输协议,将消息体封装成pong消息返回给服务消费者.
      */
     private RpcProtocol<RpcResponse> handlerHeartbeatMessageFromConsumer(RpcProtocol<RpcRequest> protocol, RpcHeader header) {

@@ -58,11 +58,13 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
         header.setRequestId(requestId);
         header.setSerializationType(serializationType);
         header.setMsgLen(dataLength);
-//        Serialization jdkSerialization = getJdkSerialization();
         Serialization serialization = getSerialization(serializationType);
+
+        RpcRequest request;
+        RpcResponse response;
         switch (msgTypeEnum) {
             case REQUEST:
-                RpcRequest request = serialization.deserialize(data, RpcRequest.class);
+                request = serialization.deserialize(data, RpcRequest.class);
                 if (request != null) {
                     RpcProtocol<RpcRequest> protocol = new RpcProtocol<>();
                     protocol.setHeader(header);
@@ -71,7 +73,7 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
                 }
                 break;
             case RESPONSE:
-                RpcResponse response = serialization.deserialize(data, RpcResponse.class);
+                response = serialization.deserialize(data, RpcResponse.class);
                 if (response != null) {
                     RpcProtocol<RpcResponse> protocol = new RpcProtocol<>();
                     protocol.setHeader(header);
@@ -87,9 +89,23 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
                 break;
             case HEARTBEAT_FROM_PROVIDER:
                 // 服务提供者发送给服务消费者的心跳数据
+                response = serialization.deserialize(data, RpcResponse.class);
+                if (response != null) {
+                    RpcProtocol<RpcResponse> protocol = new RpcProtocol<>();
+                    protocol.setHeader(header);
+                    protocol.setBody(response);
+                    out.add(protocol);
+                }
                 break;
             case HEARTBEAT_TO_PROVIDER:
                 // 服务消费者响应服务提供者的心跳数据
+                request = serialization.deserialize(data, RpcRequest.class);
+                if (request != null) {
+                    RpcProtocol<RpcRequest> protocol = new RpcProtocol<>();
+                    protocol.setHeader(header);
+                    protocol.setBody(request);
+                    out.add(protocol);
+                }
                 break;
         }
     }

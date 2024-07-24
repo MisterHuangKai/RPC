@@ -79,9 +79,9 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
     }
 
     /**
-     * 判断服务提供者响应的结果数据类型是心跳消息还是响应消息。
-     * Ⅰ.服务提供者响应的心跳消息;
-     * Ⅱ.服务提供者发送的心跳消息;
+     * 判断服务提供者响应的结果数据类型是心跳消息还是响应消息:<p>
+     * Ⅰ.服务提供者响应的心跳消息;<p>
+     * Ⅱ.服务提供者发送的心跳消息;<p>
      * Ⅲ.响应消息:正常的rpc请求.
      */
     private void handlerMessage(RpcProtocol<RpcResponse> protocol, Channel channel) {
