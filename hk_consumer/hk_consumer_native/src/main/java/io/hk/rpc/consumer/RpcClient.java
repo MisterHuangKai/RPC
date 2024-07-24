@@ -25,13 +25,14 @@ public class RpcClient {
 
     private final Logger logger = LoggerFactory.getLogger(RpcClient.class);
 
+    /**
+     * 服务的注册与发现
+     */
     private RegistryService registryService;
-
     /**
      * 代理
      */
     private String proxy;
-
     /**
      * 服务版本号
      */
@@ -90,8 +91,7 @@ public class RpcClient {
         if (StringUtils.isEmpty(registryType)) {
             throw new IllegalArgumentException("registryType is null");
         }
-        // todo 后续SPI扩展
-        RegistryService registryService = new ZookeeperRegistryService();
+        RegistryService registryService = ExtensionLoader.getExtension(RegistryService.class, registryType);
         try {
             registryService.init(new RegistryConfig(registryAddress, registryType, registryLoadBalanceType));
         } catch (Exception e) {
@@ -108,7 +108,6 @@ public class RpcClient {
      * @return <T> Class<T>
      */
     public <T> T create(Class<T> clazz) {
-//        ProxyFactory proxyFactory = new JdkProxyFactory<T>();
         ProxyFactory proxyFactory = ExtensionLoader.getExtension(ProxyFactory.class, proxy);
         proxyFactory.init(new ProxyConfig<>(clazz, serviceVersion, serviceGroup, serializationType, timeout, registryService, RpcConsumer.getInstance(heartbeatInterval, scanNotActiveChannelInterval), async, oneway));
         return proxyFactory.getProxy(clazz);
@@ -121,6 +120,5 @@ public class RpcClient {
     public void shutdown() {
         RpcConsumer.getInstance(heartbeatInterval, scanNotActiveChannelInterval).close();
     }
-
 
 }

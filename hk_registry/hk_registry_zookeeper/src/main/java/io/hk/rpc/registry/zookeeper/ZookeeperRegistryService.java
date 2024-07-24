@@ -6,6 +6,7 @@ import io.hk.rpc.protocol.meta.ServiceMeta;
 import io.hk.rpc.registry.api.RegistryService;
 import io.hk.rpc.registry.api.config.RegistryConfig;
 
+import io.hk.rpc.spi.annotation.SPIClass;
 import io.hk.rpc.spi.loader.ExtensionLoader;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -22,6 +23,7 @@ import java.util.List;
 /**
  * 基于Zookeeper的注册服务
  */
+@SPIClass
 public class ZookeeperRegistryService implements RegistryService {
 
     /**
