@@ -139,6 +139,10 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
      */
     private void handlerHeartbeatMessageToProvider(RpcProtocol<RpcRequest> protocol, Channel channel) {
         logger.info("receive service consumer heartbeat message, the consumer is: {}, the heartbeat message is: {}", channel.remoteAddress(), protocol.getBody().getParameters()[0]);
+
+        // 作业63-x: 收到服务提供者pong后,对应channel等待数-1
+        int count = ProviderChannelCache.decreaseWaitTimes(channel);
+        logger.info("收到消费者:{} 的心跳响应,当前心跳响应等待:{} 次.", channel.remoteAddress(), count);
     }
 
     /**

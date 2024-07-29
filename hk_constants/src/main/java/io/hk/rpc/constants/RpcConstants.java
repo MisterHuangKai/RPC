@@ -141,6 +141,11 @@ public class RpcConstants {
      */
     public static final String HEARTBEAT_PONG = "pong";
 
+    /**
+     * 等待pong的最大心跳次数
+     * <p>作业63-x
+     */
+    public static final int MAX_WAITING_PONG_TIMES = 3;
 
     /**
      * decoder
