@@ -8,6 +8,7 @@ import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.enumeration.RpcStatus;
 import io.hk.rpc.protocol.enumeration.RpcType;
 import io.hk.rpc.protocol.header.RpcHeader;
+import io.hk.rpc.protocol.header.RpcHeaderFactory;
 import io.hk.rpc.protocol.request.RpcRequest;
 import io.hk.rpc.protocol.response.RpcResponse;
 import io.hk.rpc.proxy.api.future.RPCFuture;
@@ -16,6 +17,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +36,7 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
     public SocketAddress remotePeer;
 
     // 存储 请求ID与RpcResponse协议的映射关系
-    private Map<Long, RPCFuture> pendingRPC = new ConcurrentHashMap<>(); // 实现异步转同步的关键
+    private static final Map<Long, RPCFuture> pendingRPC = new ConcurrentHashMap<>(); // 实现异步转同步的关键
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -62,6 +64,22 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
     }
 
     @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof IdleStateEvent) {
+            // 发送一次心跳检测
+            RpcHeader header = RpcHeaderFactory.getRequestHeader(RpcConstants.SERIALIZATION_PROTOSTUFF, RpcType.HEARTBEAT_FROM_CONSUMER.getType());
+            RpcRequest rpcRequest = new RpcRequest();
+            rpcRequest.setParameters(new Object[]{RpcConstants.HEARTBEAT_PING});
+            RpcProtocol<RpcRequest> requestRpcProtocol = new RpcProtocol<>();
+            requestRpcProtocol.setHeader(header);
+            requestRpcProtocol.setBody(rpcRequest);
+            ctx.writeAndFlush(requestRpcProtocol);
+        } else {
+            super.userEventTriggered(ctx, evt);
+        }
+    }
+
+    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
     }
@@ -71,6 +89,7 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcResponse> protocol) throws Exception {
+        logger.info("===>>> 调用RpcConsumerHandler的channelRead0方法...");
         logger.info("服务消费者接收到的数据===>>>{}", JSONObject.toJSONString(protocol));
         if (protocol == null) {
             return;
