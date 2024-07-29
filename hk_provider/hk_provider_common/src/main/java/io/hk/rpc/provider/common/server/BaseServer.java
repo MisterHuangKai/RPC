@@ -2,6 +2,7 @@ package io.hk.rpc.provider.common.server;
 
 import io.hk.rpc.codec.RpcDecoder;
 import io.hk.rpc.codec.RpcEncoder;
+import io.hk.rpc.constants.RpcConstants;
 import io.hk.rpc.provider.common.handler.RpcProviderHandler;
 import io.hk.rpc.provider.common.manager.ProviderConnectionManager;
 import io.hk.rpc.registry.api.RegistryService;
@@ -16,6 +17,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,8 +115,16 @@ public class BaseServer implements Server {
         }, 3, heartbeatInterval, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * IdleStateHandler:
+     *     <p>除了手动写定时任务实现心跳检测机制外,借助于Netty的IdleStateHandler,也可以实现心跳检测机制。
+     *     <p>Netty中的IdleStateHandler对象本质上是一个Handler处理器,配置在Netty的责任链里,当发送请求或者收到响应时,都会经过该对象处理。在双方通讯
+     * 开始后该对象会创建一些空闲检测定时器,用于检测读事件(收到请求会触发读事件)和写事件(连接、发送请求会触发写事件)。当在指定的空闲时间内没有
+     * 收到读事件或写事件,便会触发超时事件,然后IdleStateHandler将超时事件交给责任链里面的下一个Handler。
+     */
     @Override
     public void startNettyServer() {
+        // 启动心跳检测机制
         this.startHeartbeat();
         // 启动netty服务的经典代码模板
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -122,13 +132,13 @@ public class BaseServer implements Server {
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializer<SocketChannel>() {
-
                         @Override
                         protected void initChannel(SocketChannel channel) throws Exception {
                             channel.pipeline()
-                                    .addLast(new RpcDecoder())
-                                    .addLast(new RpcEncoder())
-                                    .addLast(new RpcProviderHandler(reflectType, handlerMap));
+                                    .addLast(RpcConstants.CODEC_DECODER, new RpcDecoder())
+                                    .addLast(RpcConstants.CODEC_ENCODER, new RpcEncoder())
+                                    .addLast(RpcConstants.CODEC_SERVER_IDLE_HANDLER, new IdleStateHandler(0, 0, heartbeatInterval, TimeUnit.MILLISECONDS))
+                                    .addLast(RpcConstants.CODEC_HANDLER, new RpcProviderHandler(reflectType, handlerMap));
                         }
                     }).option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);

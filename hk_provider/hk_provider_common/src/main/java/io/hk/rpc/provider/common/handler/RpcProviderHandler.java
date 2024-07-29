@@ -12,7 +12,9 @@ import io.hk.rpc.protocol.response.RpcResponse;
 import io.hk.rpc.provider.common.cache.ProviderChannelCache;
 import io.hk.rpc.reflect.api.ReflectInvoker;
 import io.hk.rpc.spi.loader.ExtensionLoader;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
+import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +51,25 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
         ProviderChannelCache.remove(ctx.channel());
+    }
+
+    /**
+     * 当Netty的IdleStateHandler触发超时机制时,会将事件传递到pipeline中的下一个Handler,也就是RpcProviderHandler,而接收超时事件的就是userEventTriggered()方法。
+     * 在方法中,首先判断事件是否是IdleStateEvent类型的事件,如果是IdleStateEvent类型的事件,在服务提供者端就会关闭当前连接,并将事件传递到责任链中的下一个Handler。
+     */
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        // 如果是IdleStateEvent事件
+        if (evt instanceof IdleStateEvent) {
+            Channel channel = ctx.channel();
+            try {
+                logger.info("IdleStateEvent triggered, close channel " + channel);
+                channel.close();
+            } finally {
+                channel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+            }
+        }
+        super.userEventTriggered(ctx, evt);
     }
 
     @Override
