@@ -19,7 +19,6 @@ import java.util.Set;
  * 服务提供者连接管理器
  */
 public class ProviderConnectionManager {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ProviderConnectionManager.class);
 
     /**
@@ -69,10 +68,10 @@ public class ProviderConnectionManager {
                 // 检查是否超过最大次数
                 boolean isOverflow = ProviderChannelCache.isWaitTimesOverflow(channel);
                 if (isOverflow) {
-                    // 关闭通道并清楚缓存等资源
+                    // 是: 关闭通道并清楚缓存等资源
                     closeChannelAndClear(channel);
                 } else {
-                    // 正常心跳请求,心跳后计数+1
+                    // 否: 正常心跳请求,心跳后计数+1
                     sendPing(responseRpcProtocol, channel);
                 }
             }
@@ -107,6 +106,5 @@ public class ProviderConnectionManager {
         int count = ProviderChannelCache.increaseWaitTimes(channel);
         LOGGER.info("发送消费者:{} 的心跳请求,当前心跳响应等待:{} 次. ", channel.remoteAddress(), count);
     }
-
 
 }

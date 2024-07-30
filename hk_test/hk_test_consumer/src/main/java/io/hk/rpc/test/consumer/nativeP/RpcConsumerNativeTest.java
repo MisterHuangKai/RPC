@@ -21,9 +21,26 @@ public class RpcConsumerNativeTest {
 
     private RpcClient rpcClient;
 
+    public static void main(String[] args){
+        RpcClient rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "random", "asm", "1.0.0", "hk",
+                "hessian2", 3000, false, false, 5000, 60000);
+        DemoService demoService = rpcClient.create(DemoService.class);
+        String result = demoService.hello("binghe");
+        LOGGER.info("返回的结果数据===>>> " + result);
+        // rpcClient.shutdown();
+    }
+
     @Before
     public void initRpcClient() {
-        rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "random", "asm", "1.0.0", "hk", "hessian2", 3000L, false, false, 1000, 5000);
+        rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "random", "asm", "1.0.0", "hk", "hessian2", 3000L, false, false, 10000, 60000);
+    }
+
+    @Test
+    public void testNoShutdown() {
+        DemoService demoService = rpcClient.create(DemoService.class);
+        String result = demoService.hello("huangDad");
+        LOGGER.info("返回的结果数据===>>>" + result);
+//        rpcClient.shutdown();
     }
 
     @Test

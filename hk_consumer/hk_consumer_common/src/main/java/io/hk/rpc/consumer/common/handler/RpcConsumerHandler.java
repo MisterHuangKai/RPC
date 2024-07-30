@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * RPC服务消费者的Handler处理类
  */
 public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<RpcResponse>> {
-
     private final Logger logger = LoggerFactory.getLogger(RpcConsumerHandler.class);
 
     private volatile Channel channel;
@@ -122,6 +121,10 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
         // 由于心跳是服务消费者向服务提供者发起,服务提供者接收到心跳消息后,会立即响应。所以在服务消费者接收到服务提供者响应的心跳消息后,可不必处理。
         // 此处简单打印即可,实际场景可不做处理
         logger.info("receive service provider heartbeat message, the provider is:{}, the heartbeat message is:{}", channel.remoteAddress(), protocol.getBody().getResult());
+
+        // 作业63-x 收到服务提供者Pong后,对应channel等待数-1
+        int count = ConsumerChannelCache.decreaseWaitTimes(channel);
+        logger.info("收到提供者:{} 的心跳请求,当前心跳响应等待:{} 次. ", channel.remoteAddress(), count);
     }
 
     /**
@@ -204,6 +207,7 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
 
     public void close() {
         channel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+        ConsumerChannelCache.remove(channel);
     }
 
     public Channel getChannel() {

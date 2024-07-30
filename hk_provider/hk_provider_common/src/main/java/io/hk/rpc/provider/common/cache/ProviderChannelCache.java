@@ -53,7 +53,7 @@ public class ProviderChannelCache {
     }
 
     /**
-     * 收到服务提供者pong后,对应channel等待数-1
+     * 收到服务消费者pong后,对应channel等待数-1
      * <p>作业63-x
      */
     public static int decreaseWaitTimes(Channel channel) {
@@ -65,7 +65,7 @@ public class ProviderChannelCache {
     }
 
     /**
-     * 给服务提供者发送ping后,对应channel等待数+1
+     * 给服务消费者发送ping后,对应channel等待数+1
      * <p>作业63-x
      */
     public static int increaseWaitTimes(Channel channel) {

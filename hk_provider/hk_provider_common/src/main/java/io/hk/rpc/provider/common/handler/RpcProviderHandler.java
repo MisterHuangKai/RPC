@@ -24,7 +24,6 @@ import java.util.Map;
  * RPC服务提供者的Handler处理类
  */
 public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<RpcRequest>> {
-
     private final Logger logger = LoggerFactory.getLogger(RpcProviderHandler.class);
 
     private final Map<String, Object> handlerMap;

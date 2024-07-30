@@ -6,6 +6,7 @@ import io.hk.rpc.consumer.common.handler.RpcConsumerHandler;
 import io.hk.rpc.consumer.common.helper.RpcConsumerHandlerHelper;
 import io.hk.rpc.consumer.common.initializer.RpcConsumerInitializer;
 import io.hk.rpc.consumer.common.manager.ConsumerConnectionManager;
+import io.hk.rpc.loadbalancer.context.ConnectionsContext;
 import io.hk.rpc.protocol.RpcProtocol;
 import io.hk.rpc.protocol.meta.ServiceMeta;
 import io.hk.rpc.protocol.request.RpcRequest;
@@ -29,7 +30,6 @@ import java.util.concurrent.TimeUnit;
  * 服务消费者
  */
 public class RpcConsumer implements Consumer {
-
     private final Logger logger = LoggerFactory.getLogger(RpcConsumer.class);
 
     private final Bootstrap bootstrap;
@@ -53,10 +53,10 @@ public class RpcConsumer implements Consumer {
     private int scanNotActiveChannelInterval = 60000;
 
     private RpcConsumer(int heartbeatInterval, int scanNotActiveChannelInterval) {
-        if(heartbeatInterval > 0) {
+        if (heartbeatInterval > 0) {
             this.heartbeatInterval = heartbeatInterval;
         }
-        if(scanNotActiveChannelInterval > 0) {
+        if (scanNotActiveChannelInterval > 0) {
             this.scanNotActiveChannelInterval = scanNotActiveChannelInterval;
         }
 
@@ -82,6 +82,7 @@ public class RpcConsumer implements Consumer {
         RpcConsumerHandlerHelper.closeRpcClientHandler();
         eventLoopGroup.shutdownGracefully();
         ClientThreadPool.shutdown();
+        executorService.shutdown();
     }
 
     @Override
@@ -111,11 +112,16 @@ public class RpcConsumer implements Consumer {
     /**
      * 创建连接并返回RpcClientHandler
      */
-    private RpcConsumerHandler getRpcConsumerHandler(String serviceAddress, int port) throws InterruptedException {
+    public RpcConsumerHandler getRpcConsumerHandler(String serviceAddress, int port) throws InterruptedException {
         ChannelFuture channelFuture = bootstrap.connect(serviceAddress, port).sync();
         channelFuture.addListener((ChannelFutureListener) listener -> {
             if (channelFuture.isSuccess()) {
                 logger.info("connect rpc server {} on port {} success.", serviceAddress, port);
+                // 添加连接信息,在服务消费者端记录每个服务提供者实例的连接次数
+                ServiceMeta serviceMeta = new ServiceMeta();
+                serviceMeta.setServiceAddr(serviceAddress);
+                serviceMeta.setServicePort(port);
+                ConnectionsContext.add(serviceMeta);
             } else {
                 logger.error("connect rpc server {} on port {} failed.", serviceAddress, port);
                 channelFuture.cause().printStackTrace();
@@ -126,18 +132,18 @@ public class RpcConsumer implements Consumer {
     }
 
     /**
-     * 1. 通过定时任务线程池调用ConsumerConnectionManager中的scanNotActiveChannel()方法,每隔60秒扫描并移除ConsumerChannelCache中不活跃的Channel.
+     * 1. 通过定时任务线程池调用ConsumerConnectionManager中的scanNotActiveChannel()方法,每隔60秒扫描并移除ConsumerChannelCache中不活跃的Channel.<p>
      * 2. 通过定时任务线程池调用ConsumerConnectionManager中的broadcastPingMessageFromConsumer()方法,每隔30秒向服务提供者发送心跳数据.
      */
-    private void startHeartbeat(){
+    private void startHeartbeat() {
         executorService = Executors.newScheduledThreadPool(2);
 
-        executorService.scheduleAtFixedRate(()->{
+        executorService.scheduleAtFixedRate(() -> {
             ConsumerConnectionManager.scanNotActiveChannel();
         }, 10, scanNotActiveChannelInterval, TimeUnit.MILLISECONDS);
 
-        executorService.scheduleAtFixedRate(()->{
-            ConsumerConnectionManager.broadcastPingMessageFromConsumer();
+        executorService.scheduleAtFixedRate(() -> {
+            ConsumerConnectionManager.broadcastPingMessageFromConsumer(this);
         }, 3, heartbeatInterval, TimeUnit.MILLISECONDS);
     }
 
