@@ -64,23 +64,23 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
         RpcResponse response;
         switch (msgTypeEnum) {
             case REQUEST:
-                request = serialization.deserialize(data, RpcRequest.class);
-                if (request != null) {
-                    RpcProtocol<RpcRequest> protocol = new RpcProtocol<>();
-                    protocol.setHeader(header);
-                    protocol.setBody(request);
-                    out.add(protocol);
-                }
-                break;
+//                request = serialization.deserialize(data, RpcRequest.class);
+//                if (request != null) {
+//                    RpcProtocol<RpcRequest> protocol = new RpcProtocol<>();
+//                    protocol.setHeader(header);
+//                    protocol.setBody(request);
+//                    out.add(protocol);
+//                }
+//                break;
             case RESPONSE:
-                response = serialization.deserialize(data, RpcResponse.class);
-                if (response != null) {
-                    RpcProtocol<RpcResponse> protocol = new RpcProtocol<>();
-                    protocol.setHeader(header);
-                    protocol.setBody(response);
-                    out.add(protocol);
-                }
-                break;
+//                response = serialization.deserialize(data, RpcResponse.class);
+//                if (response != null) {
+//                    RpcProtocol<RpcResponse> protocol = new RpcProtocol<>();
+//                    protocol.setHeader(header);
+//                    protocol.setBody(response);
+//                    out.add(protocol);
+//                }
+//                break;
             case HEARTBEAT_FROM_CONSUMER:
                 // 服务消费者发送给服务提供者的心跳数据
                 break;

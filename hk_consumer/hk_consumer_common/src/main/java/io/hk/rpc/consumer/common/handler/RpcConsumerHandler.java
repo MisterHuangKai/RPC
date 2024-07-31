@@ -88,8 +88,7 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcResponse> protocol) throws Exception {
-        logger.info("===>>> 调用RpcConsumerHandler的channelRead0方法...");
-        logger.info("服务消费者接收到的数据===>>>{}", JSONObject.toJSONString(protocol));
+        logger.info("channelRead0() ===>>> RpcConsumerHandler接收到的数据: {}", JSONObject.toJSONString(protocol));
         if (protocol == null) {
             return;
         }
@@ -104,7 +103,7 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
      */
     private void handlerMessage(RpcProtocol<RpcResponse> protocol, Channel channel) {
         RpcHeader header = protocol.getHeader();
-        logger.info("RpcConsumerHandler.handlerMessage: MsgType:{}", header.getMsgType());
+        logger.info("handlerMessage() ===>>> MsgType:{}", header.getMsgType());
         if (header.getMsgType() == (byte) RpcType.HEARTBEAT_TO_CONSUMER.getType()) { // 服务提供者响应的心跳消息
             this.handlerHeartbeatMessageToConsumer(protocol, channel);
         } else if (header.getMsgType() == (byte) RpcType.HEARTBEAT_FROM_PROVIDER.getType()) { // 服务提供者发送的心跳消息
@@ -120,11 +119,10 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
     private void handlerHeartbeatMessageToConsumer(RpcProtocol<RpcResponse> protocol, Channel channel) {
         // 由于心跳是服务消费者向服务提供者发起,服务提供者接收到心跳消息后,会立即响应。所以在服务消费者接收到服务提供者响应的心跳消息后,可不必处理。
         // 此处简单打印即可,实际场景可不做处理
-        logger.info("receive service provider heartbeat message, the provider is:{}, the heartbeat message is:{}", channel.remoteAddress(), protocol.getBody().getResult());
 
         // 作业63-x 收到服务提供者Pong后,对应channel等待数-1
         int count = ConsumerChannelCache.decreaseWaitTimes(channel);
-        logger.info("收到提供者:{} 的心跳请求,当前心跳响应等待:{} 次. ", channel.remoteAddress(), count);
+        logger.info("receive heartbeat message from service provider, the provider is:{}, the heartbeat message is:{}, the pending heartbeat count is: {}.", channel.remoteAddress(), protocol.getBody().getResult(), count);
     }
 
     /**
@@ -159,7 +157,7 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
      * 服务消费者,向服务提供者发送请求
      */
     public RPCFuture sendRequest(RpcProtocol<RpcRequest> protocol, boolean async, boolean oneway) {
-        logger.info("服务消费者发送的数据===>>>{}", JSONObject.toJSONString(protocol));
+        logger.info("sendRequest() ===>>> 服务消费者发送的数据: {}", JSONObject.toJSONString(protocol));
         return oneway ? this.sendRequestOneway(protocol) : async ? this.sendRequestAsync(protocol) : this.sendRequestSync(protocol);
     }
 

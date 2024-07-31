@@ -25,7 +25,6 @@ public class ConsumerChannelCache {
     private static volatile Map<String, AtomicInteger> waitingPongTimesMap = new ConcurrentHashMap<>();
 
     public static Set<Channel> getChannelCache() {
-        LOGGER.info("当前channelCache中数量:{}, waitingPongTimesMap中数量:{}. ", channelCache.size(), waitingPongTimesMap.size());
         return channelCache;
     }
 

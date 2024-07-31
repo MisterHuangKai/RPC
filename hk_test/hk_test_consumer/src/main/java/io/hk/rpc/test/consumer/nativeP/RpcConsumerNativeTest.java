@@ -23,10 +23,10 @@ public class RpcConsumerNativeTest {
 
     public static void main(String[] args){
         RpcClient rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "random", "asm", "1.0.0", "hk",
-                "hessian2", 3000, false, false, 5000, 60000);
+                "hessian2", 3000, false, false, 10000, 30000);
         DemoService demoService = rpcClient.create(DemoService.class);
         String result = demoService.hello("binghe");
-        LOGGER.info("返回的结果数据===>>> " + result);
+        LOGGER.info("返回的结果数据 ===>>> " + result);
         // rpcClient.shutdown();
     }
 
@@ -39,7 +39,7 @@ public class RpcConsumerNativeTest {
     public void testNoShutdown() {
         DemoService demoService = rpcClient.create(DemoService.class);
         String result = demoService.hello("huangDad");
-        LOGGER.info("返回的结果数据===>>>" + result);
+        LOGGER.info("返回的结果数据 ===>>>" + result);
 //        rpcClient.shutdown();
     }
 
@@ -47,7 +47,7 @@ public class RpcConsumerNativeTest {
     public void testInterfaceRpc() {
         DemoService demoService = rpcClient.create(DemoService.class);
         String result = demoService.hello("huangDad");
-        LOGGER.info("返回的结果数据===>>>" + result);
+        LOGGER.info("返回的结果数据 ===>>>" + result);
         rpcClient.shutdown();
     }
 
@@ -56,7 +56,7 @@ public class RpcConsumerNativeTest {
         RpcClient rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "random", "jdk", "1.0.0", "hk", "hessian2", 3000L, true, false, 30000, 600000);
         IAsyncObjectProxy iAsyncObjectProxy = rpcClient.createAsync(DemoService.class);
         RPCFuture rpcFuture = iAsyncObjectProxy.call("hello", "HuangKai");
-        LOGGER.info("返回的结果数据===>>>" + rpcFuture.get());
+        LOGGER.info("返回的结果数据 ===>>>" + rpcFuture.get());
         rpcClient.shutdown();
     }
 

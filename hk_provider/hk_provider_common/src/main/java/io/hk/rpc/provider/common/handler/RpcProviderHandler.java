@@ -1,5 +1,6 @@
 package io.hk.rpc.provider.common.handler;
 
+import com.alibaba.fastjson.JSONObject;
 import io.hk.rpc.common.helper.RpcServiceHelper;
 import io.hk.rpc.common.threadpool.ServerThreadPool;
 import io.hk.rpc.constants.RpcConstants;
@@ -83,7 +84,7 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcRequest> protocol) throws Exception {
-        logger.info("===>>> 调用RpcProviderHandler的channelRead0方法...");
+        logger.info("channelRead0() ===>>> RpcProviderHandler接收到的数据: {}", JSONObject.toJSONString(protocol));
         ServerThreadPool.submit(() -> {
             RpcProtocol<RpcResponse> responseRpcProtocol = handlerMessage(protocol, ctx.channel());
             ctx.writeAndFlush(responseRpcProtocol).addListener(new ChannelFutureListener() {
@@ -104,7 +105,7 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
     private RpcProtocol<RpcResponse> handlerMessage(RpcProtocol<RpcRequest> protocol, Channel channel) {
         RpcProtocol<RpcResponse> responseRpcProtocol = null;
         RpcHeader header = protocol.getHeader();
-        logger.info("RpcProviderHandler.handlerMessage: MsgType:{}", header.getMsgType());
+        logger.info("handlerMessage() ===>>> MsgType:{}", header.getMsgType());
         if (header.getMsgType() == (byte) RpcType.HEARTBEAT_FROM_CONSUMER.getType()) { // 服务消费者发送的心跳消息
             responseRpcProtocol = handlerHeartbeatMessageFromConsumer(protocol, header);
         } else if (header.getMsgType() == (byte) RpcType.HEARTBEAT_TO_PROVIDER.getType()) { // 服务消费者响应的心跳消息
@@ -137,11 +138,9 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
      * Ⅱ.接收服务消费者响应的心跳结果数据
      */
     private void handlerHeartbeatMessageToProvider(RpcProtocol<RpcRequest> protocol, Channel channel) {
-        logger.info("receive service consumer heartbeat message, the consumer is: {}, the heartbeat message is: {}", channel.remoteAddress(), protocol.getBody().getParameters()[0]);
-
-        // 作业63-x: 收到服务提供者pong后,对应channel等待数-1
+        // 作业63-x: 收到服务消费者pong后,对应channel等待数-1
         int count = ProviderChannelCache.decreaseWaitTimes(channel);
-        logger.info("收到消费者:{} 的心跳响应,当前心跳响应等待:{} 次.", channel.remoteAddress(), count);
+        logger.info("receive heartbeat message from service consumer, the consumer is: {}, the heartbeat message is: {}, the pending heartbeat count is: {}.", channel.remoteAddress(), protocol.getBody().getParameters()[0], count);
     }
 
     /**

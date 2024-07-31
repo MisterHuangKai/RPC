@@ -11,8 +11,6 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 /**
@@ -26,13 +24,13 @@ public class ProviderConnectionManager {
      */
     public static void scanNotActiveChannel() {
         Set<Channel> channelCache = ProviderChannelCache.getChannelCache();
-        LOGGER.info("============ scanNotActiveChannel ============ size:{}, time:{}", channelCache.size(), DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(LocalDateTime.now()));
+        LOGGER.info("============ scanNotActiveChannel ============ channelCache.size: {}", channelCache.size());
         if (channelCache == null || channelCache.isEmpty()) {
             return;
         }
         channelCache.stream().forEach(channel -> {
             if (!channel.isOpen() || !channel.isActive()) {
-                LOGGER.info("ProviderConnectionManager. scan Not Active Channel:{}", channel.remoteAddress());
+                LOGGER.info("scanNotActiveChannel() ===>>> scan Not Active Channel: {}", channel.remoteAddress());
                 channel.close();
                 ProviderChannelCache.remove(channel);
             }
@@ -44,7 +42,7 @@ public class ProviderConnectionManager {
      */
     public static void broadcastPingMessageFromProvider() {
         Set<Channel> channelCache = ProviderChannelCache.getChannelCache();
-        LOGGER.info("============ broadcastPingMessageFromProvider ============ size:{}, time:{}", channelCache.size(), DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(LocalDateTime.now()));
+        LOGGER.info("============ broadcastPingMessageFromProvider ============ channelCache.size: {}", channelCache.size());
         if (channelCache == null || channelCache.isEmpty()) {
             return;
         }
@@ -92,7 +90,7 @@ public class ProviderConnectionManager {
      * 关闭通道并清楚缓存等资源
      */
     private static void closeChannelAndClear(Channel channel) {
-        LOGGER.info("服务消费者:{} ,超过3次没有回复提供者的心跳请求,将关闭通道并删除缓存.", channel.remoteAddress());
+        LOGGER.info("服务消费者: {} ,超过3次没有回复提供者的心跳请求,将关闭通道并删除缓存.", channel.remoteAddress());
         channel.close();
         ProviderChannelCache.remove(channel);
     }
@@ -101,10 +99,9 @@ public class ProviderConnectionManager {
      * 正常心跳请求,心跳后计数+1
      */
     private static void sendPing(RpcProtocol<RpcResponse> responseRpcProtocol, Channel channel) {
-        LOGGER.info("send heartbeat message to service consumer, the consumer is: {}, the heartbeat message is: {}", channel.remoteAddress(), responseRpcProtocol.getBody().getResult());
         channel.writeAndFlush(responseRpcProtocol);
         int count = ProviderChannelCache.increaseWaitTimes(channel);
-        LOGGER.info("发送消费者:{} 的心跳请求,当前心跳响应等待:{} 次. ", channel.remoteAddress(), count);
+        LOGGER.info("send heartbeat message to service consumer, the consumer is: {}, the heartbeat message is: {}, the pending heartbeat count is: {}.", channel.remoteAddress(), responseRpcProtocol.getBody().getResult(), count);
     }
 
 }

@@ -1,5 +1,6 @@
 package io.hk.rpc.consumer.common.manager;
 
+import com.alibaba.fastjson.JSONObject;
 import io.hk.rpc.constants.RpcConstants;
 import io.hk.rpc.consumer.common.RpcConsumer;
 import io.hk.rpc.consumer.common.cache.ConsumerChannelCache;
@@ -16,8 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 /**
@@ -31,17 +30,17 @@ public class ConsumerConnectionManager {
      */
     public static void scanNotActiveChannel() {
         Set<Channel> channelCache = ConsumerChannelCache.getChannelCache();
-        LOGGER.info("============ scanNotActiveChannel ============ size:{}, time:{}", channelCache.size(), DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(LocalDateTime.now()));
+        LOGGER.info("============ scanNotActiveChannel ============ size: {}", channelCache.size());
         if (channelCache == null || channelCache.isEmpty()) {
             return;
         }
         channelCache.stream().forEach(channel -> {
             if (!channel.isOpen() || !channel.isActive()) {
-                LOGGER.info("ConsumerConnectionManager. scan Not Active Channel:{}", channel.remoteAddress());
+                LOGGER.info("scanNotActiveChannel() ===>>> scan Not Active Channel: {}", channel.remoteAddress());
                 channel.close();
                 ConsumerChannelCache.remove(channel);
-                // 清除 RpcConsumerHandlerHelper 缓存
                 // 作业63-x
+                // 清除 RpcConsumerHandlerHelper 缓存
                 RpcConsumerHandlerHelper.remove(channel);
             }
         });
@@ -52,7 +51,7 @@ public class ConsumerConnectionManager {
      */
     public static void broadcastPingMessageFromConsumer(RpcConsumer rpcConsumer) {
         Set<Channel> channelCache = ConsumerChannelCache.getChannelCache();
-        LOGGER.info("============ broadcastPingMessageFromConsumer ============ size:{}, time:{}", channelCache.size(), DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(LocalDateTime.now()));
+        LOGGER.info("============ broadcastPingMessageFromConsumer ============ size: {}", channelCache.size());
         if (channelCache == null || channelCache.isEmpty()) {
             return;
         }
@@ -102,14 +101,14 @@ public class ConsumerConnectionManager {
         // 2.通过RpcConsumer重连并获取 RpcConsumerHandler
         try {
             RpcConsumerHandlerHelper.remove(channel);
-            LOGGER.info("消费者发送给提供者的心跳请求,超过 {} 次没有回复,开始重新连接提供者: {}", RpcConstants.MAX_WAITING_PONG_TIMES, channel.remoteAddress());
+            LOGGER.info("服务提供者: {} ,超过3次没有回复消费者的心跳请求,开始重新连接提供者.", channel.remoteAddress());
             RpcConsumerHandler consumerHandler = rpcConsumer.getRpcConsumerHandler(address, port);
             // 3.覆盖RpcConsumerHandlerHelper中的缓存
             ServiceMeta serviceMeta = new ServiceMeta();
             serviceMeta.setServiceAddr(address);
             serviceMeta.setServicePort(port);
             RpcConsumerHandlerHelper.put(serviceMeta, consumerHandler);
-            LOGGER.info("当前RpcConsumerHandlerHelper中缓存的数量: {}", RpcConsumerHandlerHelper.size());
+            LOGGER.info("RpcConsumerHandlerHelper中缓存的数量: {}", RpcConsumerHandlerHelper.size());
         } catch (InterruptedException e) {
             LOGGER.error("消费者重连提供者{} 异常", channel.remoteAddress(), e);
             e.printStackTrace();
@@ -117,10 +116,10 @@ public class ConsumerConnectionManager {
     }
 
     private static void sendPing(RpcProtocol<RpcRequest> requestRpcProtocol, Channel channel) {
-        LOGGER.info("send heartbeat message to service provider, the provider is: {}, the heartbeat message is: {}", channel.remoteAddress(), RpcConstants.HEARTBEAT_PING);
         channel.writeAndFlush(requestRpcProtocol);
         int count = ConsumerChannelCache.increaseWaitTimes(channel);
-        LOGGER.info("发送提供者:{} 的心跳请求,当前心跳响应等待:{} 次. ", channel.remoteAddress(), count);
+        LOGGER.info("send heartbeat message to service provider, the provider is: {}, the heartbeat message is: {}, the pending heartbeat count is: {}.", channel.remoteAddress(), RpcConstants.HEARTBEAT_PING, count);
+        LOGGER.info("send heartbeat message:" + JSONObject.toJSONString(requestRpcProtocol));
     }
 
     private static RpcProtocol<RpcRequest> getRpcRequestRpcProtocol() {
