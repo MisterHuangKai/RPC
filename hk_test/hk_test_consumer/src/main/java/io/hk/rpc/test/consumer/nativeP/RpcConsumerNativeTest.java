@@ -23,7 +23,7 @@ public class RpcConsumerNativeTest {
 
     public static void main(String[] args){
         RpcClient rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "random", "asm", "1.0.0", "hk",
-                "hessian2", 3000, false, false, 10000, 30000);
+                "hessian2", 3000, false, false, 10000, 30000, 2000, 5);
         DemoService demoService = rpcClient.create(DemoService.class);
         String result = demoService.hello("binghe");
         LOGGER.info("返回的结果数据 ===>>> " + result);
@@ -32,7 +32,7 @@ public class RpcConsumerNativeTest {
 
     @Before
     public void initRpcClient() {
-        rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "random", "asm", "1.0.0", "hk", "hessian2", 3000L, false, false, 10000, 60000);
+        rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "random", "asm", "1.0.0", "hk", "hessian2", 3000L, false, false, 10000, 60000, 2000, 5);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class RpcConsumerNativeTest {
 
     @Test
     public void testAsyncInterfaceRpc() throws Exception {
-        RpcClient rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "random", "jdk", "1.0.0", "hk", "hessian2", 3000L, true, false, 30000, 600000);
+        RpcClient rpcClient = new RpcClient("47.103.9.3:2181", "zookeeper", "random", "jdk", "1.0.0", "hk", "hessian2", 3000L, true, false, 30000, 600000, 2000, 5);
         IAsyncObjectProxy iAsyncObjectProxy = rpcClient.createAsync(DemoService.class);
         RPCFuture rpcFuture = iAsyncObjectProxy.call("hello", "HuangKai");
         LOGGER.info("返回的结果数据 ===>>>" + rpcFuture.get());

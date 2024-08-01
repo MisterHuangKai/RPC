@@ -17,7 +17,7 @@ public class RpcConsumerHandlerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcConsumerHandlerTest.class);
 
     public static void main(String[] args) throws Exception {
-        RpcConsumer rpcConsumer = RpcConsumer.getInstance(30000, 60000);
+        RpcConsumer rpcConsumer = RpcConsumer.getInstance(30000, 60000, 2000, 5);
 
         // 同步调用
 //        RPCFuture rpcFuture = rpcConsumer.sendRequest(getRpcRequestProtocol());
