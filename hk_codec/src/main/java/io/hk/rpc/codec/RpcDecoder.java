@@ -39,7 +39,7 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
         String serializationType = SerializationUtils.subString(serializationTypeByteBuf.toString(CharsetUtil.UTF_8));
 
         int dataLength = in.readInt();
-        if (in.readableBytes() > dataLength) {
+        if (in.readableBytes() < dataLength) {
             in.resetReaderIndex();
             return;
         }
@@ -64,39 +64,10 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
         RpcResponse response;
         switch (msgTypeEnum) {
             case REQUEST:
-//                request = serialization.deserialize(data, RpcRequest.class);
-//                if (request != null) {
-//                    RpcProtocol<RpcRequest> protocol = new RpcProtocol<>();
-//                    protocol.setHeader(header);
-//                    protocol.setBody(request);
-//                    out.add(protocol);
-//                }
-//                break;
-            case RESPONSE:
-//                response = serialization.deserialize(data, RpcResponse.class);
-//                if (response != null) {
-//                    RpcProtocol<RpcResponse> protocol = new RpcProtocol<>();
-//                    protocol.setHeader(header);
-//                    protocol.setBody(response);
-//                    out.add(protocol);
-//                }
-//                break;
+
             case HEARTBEAT_FROM_CONSUMER:
                 // 服务消费者发送给服务提供者的心跳数据
-                break;
-            case HEARTBEAT_TO_CONSUMER:
-                // 服务提供者响应服务消费者的心跳数据
-                break;
-            case HEARTBEAT_FROM_PROVIDER:
-                // 服务提供者发送给服务消费者的心跳数据
-                response = serialization.deserialize(data, RpcResponse.class);
-                if (response != null) {
-                    RpcProtocol<RpcResponse> protocol = new RpcProtocol<>();
-                    protocol.setHeader(header);
-                    protocol.setBody(response);
-                    out.add(protocol);
-                }
-                break;
+
             case HEARTBEAT_TO_PROVIDER:
                 // 服务消费者响应服务提供者的心跳数据
                 request = serialization.deserialize(data, RpcRequest.class);
@@ -107,6 +78,23 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
                     out.add(protocol);
                 }
                 break;
+
+            case RESPONSE:
+
+            case HEARTBEAT_TO_CONSUMER:
+                // 服务提供者响应服务消费者的心跳数据
+
+            case HEARTBEAT_FROM_PROVIDER:
+                // 服务提供者发送给服务消费者的心跳数据
+                response = serialization.deserialize(data, RpcResponse.class);
+                if (response != null) {
+                    RpcProtocol<RpcResponse> protocol = new RpcProtocol<>();
+                    protocol.setHeader(header);
+                    protocol.setBody(response);
+                    out.add(protocol);
+                }
+                break;
+
         }
     }
 
