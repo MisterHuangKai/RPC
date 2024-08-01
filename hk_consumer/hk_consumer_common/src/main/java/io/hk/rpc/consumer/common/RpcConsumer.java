@@ -23,6 +23,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.ConnectException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +61,10 @@ public class RpcConsumer implements Consumer {
      * 服务订阅重试机制的 重试次数
      */
     private int retryTimes = 3;
+    /**
+     * 连接服务提供者重试机制的 当前重试次数
+     */
+    private volatile int currentConnectRetryTimes = 0;
 
     private RpcConsumer(int heartbeatInterval, int scanNotActiveChannelInterval, int retryInterval, int retryTimes) {
         if (heartbeatInterval > 0) {
@@ -181,6 +186,44 @@ public class RpcConsumer implements Consumer {
             }
         }
         return serviceMeta;
+    }
+
+
+    private RpcConsumerHandler getRpcConsumerHandlerWithRetry(ServiceMeta serviceMeta) throws InterruptedException {
+        logger.info("服务消费者连接服务提供者...");
+        RpcConsumerHandler handler = null;
+        try {
+            handler = this.getRpcConsumerHandlerWithCache(serviceMeta);
+        } catch (Exception e) {
+            // 连接异常
+            if (e instanceof ConnectException) {
+                // 启动重试机制
+                if (handler == null) {
+                    if (currentConnectRetryTimes < retryTimes) {
+                        currentConnectRetryTimes++;
+                        logger.info("服务消费者连接服务提供者, 第【 {} 】次重试...", currentConnectRetryTimes);
+                        handler = this.getRpcConsumerHandlerWithRetry(serviceMeta);
+                        Thread.sleep(retryInterval);
+                    }
+                }
+            }
+        }
+        return handler;
+    }
+
+    private RpcConsumerHandler getRpcConsumerHandlerWithCache(ServiceMeta serviceMeta) throws InterruptedException {
+        RpcConsumerHandler handler = RpcConsumerHandlerHelper.get(serviceMeta);
+        if (handler == null) {
+            // 缓存中无RpcConsumerHandler
+            handler = getRpcConsumerHandler(serviceMeta);
+            RpcConsumerHandlerHelper.put(serviceMeta, handler);
+        } else if (!handler.getChannel().isActive()) {
+            // 缓存中存在RpcConsumerHandler,但不活跃
+            handler.close();
+            handler = getRpcConsumerHandler(serviceMeta);
+            RpcConsumerHandlerHelper.put(serviceMeta, handler);
+        }
+        return handler;
     }
 
 }
