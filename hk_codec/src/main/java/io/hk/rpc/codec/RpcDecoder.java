@@ -60,8 +60,7 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
         header.setMsgLen(dataLength);
         Serialization serialization = getSerialization(serializationType);
 
-        RpcRequest request;
-        RpcResponse response;
+        // ⭐REQUEST、HEARTBEAT_FROM_CONSUMER、HEARTBEAT_TO_PROVIDER 共用一个break,利用了这种穿透行为.
         switch (msgTypeEnum) {
             case REQUEST:
 
@@ -70,7 +69,7 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
 
             case HEARTBEAT_TO_PROVIDER:
                 // 服务消费者响应服务提供者的心跳数据
-                request = serialization.deserialize(data, RpcRequest.class);
+                RpcRequest request = serialization.deserialize(data, RpcRequest.class);
                 if (request != null) {
                     RpcProtocol<RpcRequest> protocol = new RpcProtocol<>();
                     protocol.setHeader(header);
@@ -86,7 +85,7 @@ public class RpcDecoder extends ByteToMessageDecoder implements RpcCodec {
 
             case HEARTBEAT_FROM_PROVIDER:
                 // 服务提供者发送给服务消费者的心跳数据
-                response = serialization.deserialize(data, RpcResponse.class);
+                RpcResponse response = serialization.deserialize(data, RpcResponse.class);
                 if (response != null) {
                     RpcProtocol<RpcResponse> protocol = new RpcProtocol<>();
                     protocol.setHeader(header);
